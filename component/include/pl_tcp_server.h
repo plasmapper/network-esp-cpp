@@ -60,7 +60,9 @@ public:
   /// @return client streams
   std::vector<std::shared_ptr<NetworkStream>> GetClientStreams();
 
-  // Set the task parameters
+  /// @brief Set the server task parameters
+  /// @param taskParameters task parameters
+  /// @return error code
   esp_err_t SetTaskParameters (const TaskParameters& taskParameters);
 
   /// @brief Set the idle time before the keep-alive packets are sent

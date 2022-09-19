@@ -43,6 +43,9 @@ struct IpV4Address {
   /// @brief Create an IPv4 address from dword in network byte order
   IpV4Address (uint32_t u32);
 
+  /// @brief Create an IPv4 address from string
+  IpV4Address (const std::string& address);
+
   /// @brief Convert address to string
   /// @return address as string
   std::string ToString() const;
@@ -75,6 +78,9 @@ struct IpV6Address {
 
   /// @brief Create an IPv6 address from dwords in network byte order
   IpV6Address (uint32_t u32_0, uint32_t u32_1, uint32_t u32_2, uint32_t u32_3, uint8_t zoneId = 0);
+
+  /// @brief Create an IPv6 address from string
+  IpV6Address (const std::string& address);
 
   /// @brief Convert address to string
   /// @return address as string

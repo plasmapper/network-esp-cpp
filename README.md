@@ -1,3 +1,3 @@
 # Network C++ Class Component for ESP-IDF
 
-[Documentation](https://plasmapper.github.io/esp-cpp/network)
+[Documentation](https://plasmapper.github.io/esp-cpp/components/network/docs)

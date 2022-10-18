@@ -13,6 +13,14 @@ class TcpServer : public NetworkServer {
 public:
   /// @brief Default TCP server task parameters
   static const TaskParameters defaultTaskParameters;
+  /// @brief Default maximum number of server clients
+  const int defaultMaxNumberOfClients = 1;
+  /// @brief Default idle time before the keep-alive packets are sent in seconds
+  const int defaultKeepAliveIdleTime = 7200;
+  /// @brief Default keep-alive packet interval in seconds
+  const int defaultKeepAliveInterval = 75;
+  /// @brief Default number of the keep-alive packets
+  const int defaultKeepAliveCount = 9;
 
   /// @brief Client connected event
   Event<TcpServer, NetworkStream&> clientConnectedEvent;
@@ -90,14 +98,14 @@ private:
   Mutex mutex;
   enum class Status {stopped, starting, started, stopping} status = Status::stopped;
   uint16_t port = 0;
-  int maxNumberOfClients = 1;
+  int maxNumberOfClients = defaultMaxNumberOfClients;
   std::vector<std::shared_ptr<NetworkStream>> clientStreams;
   TaskParameters taskParameters = defaultTaskParameters;
   bool nagleAlgorithmEnabled = true;
   bool keepAliveEnabled = false;
-  int keepAliveIdleTime = 7200;
-  int keepAliveInterval = 75;
-  int keepAliveCount = 9;
+  int keepAliveIdleTime = defaultKeepAliveIdleTime;
+  int keepAliveInterval = defaultKeepAliveInterval;
+  int keepAliveCount = defaultKeepAliveCount;
 
   esp_err_t SetStreamSocketOptions();
   static void TaskCode (void* parameters);

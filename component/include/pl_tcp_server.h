@@ -14,13 +14,13 @@ public:
   /// @brief Default TCP server task parameters
   static const TaskParameters defaultTaskParameters;
   /// @brief Default maximum number of server clients
-  const int defaultMaxNumberOfClients = 1;
+  static const int defaultMaxNumberOfClients = 1;
   /// @brief Default idle time before the keep-alive packets are sent in seconds
-  const int defaultKeepAliveIdleTime = 7200;
+  static const int defaultKeepAliveIdleTime = 7200;
   /// @brief Default keep-alive packet interval in seconds
-  const int defaultKeepAliveInterval = 75;
+  static const int defaultKeepAliveInterval = 75;
   /// @brief Default number of the keep-alive packets
-  const int defaultKeepAliveCount = 9;
+  static const int defaultKeepAliveCount = 9;
 
   /// @brief Client connected event
   Event<TcpServer, NetworkStream&> clientConnectedEvent;

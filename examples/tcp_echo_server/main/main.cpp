@@ -31,7 +31,7 @@ public:
 PL::EspWiFiStation wifi;
 const std::string wifiSsid = CONFIG_EXAMPLE_WIFI_SSID;
 const std::string wifiPassword = CONFIG_EXAMPLE_WIFI_PASSWORD;
-auto wiFiGotIpV4EventHandler = std::make_shared<WiFiGotIpEventHandler>();
+auto wiFiGotIpEventHandler = std::make_shared<WiFiGotIpEventHandler>();
 
 EchoServer server;
 auto clientEventHandler = std::make_shared<ClientEventHandler>();
@@ -45,10 +45,8 @@ extern "C" void app_main(void) {
   wifi.Initialize();
   wifi.SetSsid (wifiSsid);
   wifi.SetPassword (wifiPassword);
-  wifi.gotIpV4AddressEvent.AddHandler (wiFiGotIpV4EventHandler, &WiFiGotIpEventHandler::OnGotIpV4Address);
-  wifi.gotIpV6AddressEvent.AddHandler (wiFiGotIpV4EventHandler, &WiFiGotIpEventHandler::OnGotIpV6Address);
-  wifi.gotIpV4AddressEvent.AddHandler (wiFiGotIpV4EventHandler, &WiFiGotIpEventHandler::OnGotIpV4Address);
-  wifi.gotIpV6AddressEvent.AddHandler (wiFiGotIpV4EventHandler, &WiFiGotIpEventHandler::OnGotIpV6Address);
+  wifi.gotIpV4AddressEvent.AddHandler (wiFiGotIpEventHandler, &WiFiGotIpEventHandler::OnGotIpV4Address);
+  wifi.gotIpV6AddressEvent.AddHandler (wiFiGotIpEventHandler, &WiFiGotIpEventHandler::OnGotIpV6Address);
 
   server.clientConnectedEvent.AddHandler (clientEventHandler, &ClientEventHandler::OnClientConnected);
   server.clientDisconnectedEvent.AddHandler (clientEventHandler, &ClientEventHandler::OnClientDisconnected);

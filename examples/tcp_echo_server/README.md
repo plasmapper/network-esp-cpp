@@ -1,4 +1,4 @@
-# TCP echo server example
+# TCP Echo Server Example
 
 1. EchoServer class inherits TcpServer class and overrides HandleRequest method to implement echo functionality.
 2. Internal ESP Wi-Fi station interface is created and initialized.

@@ -7,6 +7,8 @@ public:
   static const uint16_t defaultPort = 7;
 
   EchoServer();
+
+protected:
   esp_err_t HandleRequest (PL::NetworkStream& clientStream) override;
 };
 

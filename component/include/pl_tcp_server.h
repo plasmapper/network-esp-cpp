@@ -11,7 +11,7 @@ namespace PL {
 /// @brief TCP server class
 class TcpServer : public NetworkServer {
 public:
-  /// @brief Default TCP server task parameters
+  /// @brief Default server task parameters
   static const TaskParameters defaultTaskParameters;
   /// @brief Default maximum number of server clients
   static const int defaultMaxNumberOfClients = 1;

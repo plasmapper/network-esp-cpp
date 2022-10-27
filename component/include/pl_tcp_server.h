@@ -109,6 +109,8 @@ private:
 
   esp_err_t SetStreamSocketOptions();
   static void TaskCode (void* parameters);
+
+  esp_err_t RestartIfEnabled(); 
 };
 
 //==============================================================================

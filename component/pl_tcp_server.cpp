@@ -121,15 +121,8 @@ uint16_t TcpServer::GetPort() {
 
 esp_err_t TcpServer::SetPort (uint16_t port) {
   LockGuard lg (*this);
-  if (status == Status::stopped) {
-    this->port = port;
-    return ESP_OK;
-  }  
-  else {
-    PL_RETURN_ON_ERROR (Disable());
-    this->port = port;
-    return Enable();
-  }
+  this->port = port;
+  return RestartIfEnabled();
 }
 
 //==============================================================================
@@ -143,15 +136,8 @@ size_t TcpServer::GetMaxNumberOfClients() {
 
 esp_err_t TcpServer::SetMaxNumberOfClients(size_t maxNumberOfClients) {
   LockGuard lg (*this);
-  if (status == Status::stopped) {
-    this->maxNumberOfClients = maxNumberOfClients;
-    return ESP_OK;
-  }  
-  else {
-    PL_RETURN_ON_ERROR (Disable());
-    this->maxNumberOfClients = maxNumberOfClients;
-    return Enable();
-  }
+  this->maxNumberOfClients = maxNumberOfClients;
+  return RestartIfEnabled();
 }
 
 //==============================================================================
@@ -165,15 +151,8 @@ std::vector<std::shared_ptr<NetworkStream>> TcpServer::GetClientStreams() {
 
 esp_err_t TcpServer::SetTaskParameters (const TaskParameters& taskParameters) {
   LockGuard lg (*this);
-  if (status == Status::stopped) {
-    this->taskParameters = taskParameters;
-    return ESP_OK;
-  }  
-  else {
-    PL_RETURN_ON_ERROR (Disable());
-    this->taskParameters = taskParameters;
-    return Enable();
-  }
+  this->taskParameters = taskParameters;
+  return RestartIfEnabled();
 }
 
 //==============================================================================
@@ -285,6 +264,15 @@ void TcpServer::TaskCode (void* parameters) {
     server.status = Status::stopped;
 
   vTaskDelete (NULL);
+}
+
+//==============================================================================
+
+esp_err_t TcpServer::RestartIfEnabled() {
+  if (status == Status::stopped)
+    return ESP_OK;
+  PL_RETURN_ON_ERROR (Disable());
+  return Enable();
 }
 
 //==============================================================================

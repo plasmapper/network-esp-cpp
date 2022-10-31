@@ -27,7 +27,9 @@ public:
   esp_err_t Lock (TickType_t timeout = portMAX_DELAY) override;
   esp_err_t Unlock() override;
 
+  using Stream::Read;
   esp_err_t Read (void* dest, size_t size) override;
+  using Stream::Write;
   esp_err_t Write (const void* src, size_t size) override;
 
   /// @brief Close the stream

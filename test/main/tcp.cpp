@@ -3,7 +3,7 @@
 
 //==============================================================================
 
-uint16_t port = 500;
+static uint16_t port = 500;
 const size_t maxNumberOfClients = 2;
 const PL::IpV4Address ipV4Address (127, 0, 0, 1);
 const PL::IpV6Address ipV6Address (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);

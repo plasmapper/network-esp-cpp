@@ -17,12 +17,10 @@ public:
 
   /// @brief Create a closed network stream
   NetworkStream() {}
+
   /// @brief Create an open network stream
   /// @param sock stream socket
   NetworkStream (int sock);
-  ~NetworkStream();
-  NetworkStream (const NetworkStream&) = delete;
-  NetworkStream& operator= (const NetworkStream&) = delete;
 
   esp_err_t Lock (TickType_t timeout = portMAX_DELAY) override;
   esp_err_t Unlock() override;

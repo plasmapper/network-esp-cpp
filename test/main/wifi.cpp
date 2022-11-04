@@ -8,7 +8,7 @@ const std::string password = CONFIG_TEST_WIFI_PASSWORD;
 const PL::IpV4Address staticIpV4Address (192, 168, 0, 10);
 const PL::IpV4Address staticIpV4Netmask (255, 255, 255, 0);
 const PL::IpV4Address staticIpV4Gateway (192, 168, 0, 1);
-const TickType_t connectionTimeout = 3000 / portTICK_PERIOD_MS;
+const TickType_t connectionTimeout = 5000 / portTICK_PERIOD_MS;
 
 //==============================================================================
 

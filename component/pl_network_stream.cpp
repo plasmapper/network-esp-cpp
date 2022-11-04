@@ -12,13 +12,6 @@ NetworkStream::NetworkStream (int sock) : sock (sock) {
 
 //==============================================================================
 
-NetworkStream::~NetworkStream() {
-  if (sock >= 0)
-    close (sock);
-}
-
-//==============================================================================
-
 esp_err_t NetworkStream::Lock (TickType_t timeout) {
   return mutex.Lock(timeout);
 }

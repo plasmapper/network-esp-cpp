@@ -23,11 +23,11 @@ enum class NetworkAddressFamily {
 /// @brief IPv4 address
 struct IpV4Address {
   union {
-    /// @brief address as 4 bytes in network byte order
+    /// @brief Address as 4 bytes in network byte order
     uint8_t u8[4];
-    /// @brief address as 2 words in network byte order
+    /// @brief Address as 2 words in network byte order
     uint16_t u16[2];
-    /// @brief address as dword in network byte order
+    /// @brief Address as dword in network byte order
     uint32_t u32;
   };
 
@@ -56,11 +56,11 @@ struct IpV4Address {
 /// @brief IPv6 address
 struct IpV6Address {
   union {
-    /// @brief address as 16 bytes in network byte order
+    /// @brief Address as 16 bytes in network byte order
     uint8_t u8[16];
-    /// @brief address as 8 words in network byte order
+    /// @brief Address as 8 words in network byte order
     uint16_t u16[8];
-    /// @brief address as 4 dwords in network byte order
+    /// @brief Address as 4 dwords in network byte order
     uint32_t u32[4];
   };
   /// @brief IPv6 zone ID

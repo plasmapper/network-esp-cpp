@@ -1,5 +1,10 @@
 #include "pl_esp_ethernet.h"
+#include "esp_check.h"
 #include "esp_event.h"
+
+//==============================================================================
+
+static const char* TAG = "pl_esp_ethernet";
 
 //==============================================================================
 
@@ -40,13 +45,20 @@ EspEthernet::~EspEthernet() {
 //==============================================================================
 
 esp_err_t EspEthernet::Lock (TickType_t timeout) {
-  return mutex.Lock (timeout);
+  esp_err_t error = mutex.Lock (timeout);
+  if (error == ESP_OK)
+    return ESP_OK;
+  if (error == ESP_ERR_TIMEOUT && timeout == 0)
+    return ESP_ERR_TIMEOUT;
+  ESP_RETURN_ON_ERROR (error, TAG, "ESP ethernet lock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspEthernet::Unlock() {
-  return mutex.Unlock();
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "ESP ethernet unlock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -59,14 +71,14 @@ esp_err_t EspEthernet::Initialize() {
   esp_eth_phy_t* phy = phyNewFunction (&phyConfig);
   esp_eth_mac_t* mac = esp_eth_mac_new_esp32 (&macConfig);
   esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG (mac, phy);
-  PL_RETURN_ON_ERROR (esp_eth_driver_install (&ethernetConfig, &handle));
+  ESP_RETURN_ON_ERROR (esp_eth_driver_install (&ethernetConfig, &handle), TAG, "ethernet driver install failed");
   esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();
   netif = esp_netif_new (&netifConfig);
   netifGlueHandle = esp_eth_new_netif_glue (handle);
-  PL_RETURN_ON_ERROR (esp_netif_attach (netif, netifGlueHandle));
+  ESP_RETURN_ON_ERROR (esp_netif_attach (netif, netifGlueHandle), TAG, "netif attach failed");
 
-  PL_RETURN_ON_ERROR (esp_event_handler_instance_register (ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL));
-  PL_RETURN_ON_ERROR (EspNetworkInterface::Initialize (netif));
+  ESP_RETURN_ON_ERROR (esp_event_handler_instance_register (ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
+  ESP_RETURN_ON_ERROR (EspNetworkInterface::Initialize (netif), TAG, "network interface initialize failed");
   return ESP_OK;
 }
 
@@ -74,12 +86,11 @@ esp_err_t EspEthernet::Initialize() {
 
 esp_err_t EspEthernet::Enable() {
   LockGuard lg (*this);
-  if (!netif)
-    return ESP_ERR_INVALID_STATE;
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
   if (enabled)
     return ESP_OK;
 
-  PL_RETURN_ON_ERROR (esp_eth_start (handle));
+  ESP_RETURN_ON_ERROR (esp_eth_start (handle), TAG, "ethernet start failed");
   enabled = true;
   enabledEvent.Generate();
 
@@ -90,12 +101,11 @@ esp_err_t EspEthernet::Enable() {
 
 esp_err_t EspEthernet::Disable() {
   LockGuard lg (*this);
-  if (!netif)
-    return ESP_ERR_INVALID_STATE;
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
   if (!enabled)
     return ESP_OK;
 
-  PL_RETURN_ON_ERROR (esp_eth_stop (handle));
+  ESP_RETURN_ON_ERROR (esp_eth_stop (handle), TAG, "ethernet stop failed");
   enabled = false;
   disabledEvent.Generate();
 

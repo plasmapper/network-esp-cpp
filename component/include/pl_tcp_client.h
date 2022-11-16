@@ -34,11 +34,11 @@ public:
   /// @return error code
   esp_err_t Disconnect();
 
-  /// @brief Enable the Nagle algorithm
+  /// @brief Enable the Nagle's algorithm
   /// @return error code
   esp_err_t EnableNagleAlgorithm();
 
-  /// @brief Disable the Nagle algorithm
+  /// @brief Disable the Nagle's algorithm
   /// @return error code
   esp_err_t DisableNagleAlgorithm();
 

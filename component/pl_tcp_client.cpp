@@ -1,5 +1,10 @@
 #include "pl_tcp_client.h"
 #include "lwip/sockets.h"
+#include "esp_check.h"
+
+//==============================================================================
+
+static const char* TAG = "pl_tcp_client";
 
 //==============================================================================
 
@@ -22,13 +27,20 @@ TcpClient::~TcpClient() {
 //==============================================================================
 
 esp_err_t TcpClient::Lock (TickType_t timeout) {
-  return mutex.Lock (timeout);
+  esp_err_t error = mutex.Lock (timeout);
+  if (error == ESP_OK)
+    return ESP_OK;
+  if (error == ESP_ERR_TIMEOUT && timeout == 0)
+    return ESP_ERR_TIMEOUT;
+  ESP_RETURN_ON_ERROR (error, TAG, "TCP client lock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t TcpClient::Unlock() {
-  return mutex.Unlock();
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "TCP client unlock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -38,9 +50,6 @@ esp_err_t TcpClient::Connect() {
   if (stream->IsOpen())
     return ESP_OK;
   int sock;
-
-  if (remoteEndpoint.address.family != NetworkAddressFamily::ipV4 && remoteEndpoint.address.family != NetworkAddressFamily::ipV6)
-    return ESP_FAIL;
 
   int addressFamily = remoteEndpoint.address.family == NetworkAddressFamily::ipV4 ? AF_INET : AF_INET6;
   if ((sock = socket (addressFamily, SOCK_STREAM, IPPROTO_TCP)) >= 0) {
@@ -67,19 +76,22 @@ esp_err_t TcpClient::Connect() {
 
     if (connected) {
       stream = std::make_shared<NetworkStream>(sock);
-      PL_RETURN_ON_ERROR ((nagleAlgorithmEnabled ? stream->EnableNagleAlgorithm() : stream->DisableNagleAlgorithm()));
-      return stream->SetReadTimeout (readTimeout);
+      ESP_RETURN_ON_ERROR ((nagleAlgorithmEnabled ? stream->EnableNagleAlgorithm() : stream->DisableNagleAlgorithm()), TAG, "Nagle's algorithm set failed");
+      ESP_RETURN_ON_ERROR (stream->SetReadTimeout (readTimeout), TAG, "read timeout set failed");
+      return ESP_OK;
     }
     close (sock);
   }
-  return ESP_FAIL;
+  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "socket create failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t TcpClient::Disconnect() {
   LockGuard lg (*this);
-  return stream->Close();
+  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "network stream close failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -87,7 +99,8 @@ esp_err_t TcpClient::Disconnect() {
 esp_err_t TcpClient::EnableNagleAlgorithm() {
   LockGuard lg (*this);
   this->nagleAlgorithmEnabled = true;
-  return stream->EnableNagleAlgorithm();
+  ESP_RETURN_ON_ERROR (stream->EnableNagleAlgorithm(), TAG, "Nagle's algorithm enable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -95,7 +108,8 @@ esp_err_t TcpClient::EnableNagleAlgorithm() {
 esp_err_t TcpClient::DisableNagleAlgorithm() {
   LockGuard lg (*this);
   this->nagleAlgorithmEnabled = false;
-  return stream->DisableNagleAlgorithm();
+  ESP_RETURN_ON_ERROR (stream->DisableNagleAlgorithm(), TAG, "Nagle's algorithm disable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -117,7 +131,8 @@ TickType_t TcpClient::GetReadTimeout() {
 esp_err_t TcpClient::SetReadTimeout (TickType_t timeout) {
   LockGuard lg (*this);
   this->readTimeout = timeout;
-  return stream->SetReadTimeout(timeout);
+  ESP_RETURN_ON_ERROR ( stream->SetReadTimeout(timeout), TAG, "read timeout set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -138,7 +153,7 @@ NetworkEndpoint TcpClient::GetRemoteEndpoint() {
 
 esp_err_t TcpClient::SetRemoteEndpoint (IpV4Address address, uint16_t port) {
   LockGuard lg (*this);
-  PL_RETURN_ON_ERROR (stream->Close());
+  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "network stream close failed");
   remoteEndpoint = NetworkEndpoint (address, port);
   return ESP_OK;
 }
@@ -147,7 +162,7 @@ esp_err_t TcpClient::SetRemoteEndpoint (IpV4Address address, uint16_t port) {
 
 esp_err_t TcpClient::SetRemoteEndpoint (IpV6Address address, uint16_t port) {
   LockGuard lg (*this);
-  PL_RETURN_ON_ERROR (stream->Close());
+  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "network stream close failed");
   remoteEndpoint = NetworkEndpoint (address, port);
   return ESP_OK;
 }

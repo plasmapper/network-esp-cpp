@@ -1,4 +1,9 @@
 #include "pl_network_stream.h"
+#include "esp_check.h"
+
+//==============================================================================
+
+static const char* TAG = "pl_network_stream";
 
 //==============================================================================
 
@@ -13,21 +18,27 @@ NetworkStream::NetworkStream (int sock) : sock (sock) {
 //==============================================================================
 
 esp_err_t NetworkStream::Lock (TickType_t timeout) {
-  return mutex.Lock(timeout);
+  esp_err_t error = mutex.Lock (timeout);
+  if (error == ESP_OK)
+    return ESP_OK;
+  if (error == ESP_ERR_TIMEOUT && timeout == 0)
+    return ESP_ERR_TIMEOUT;
+  ESP_RETURN_ON_ERROR (error, TAG, "network stream lock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::Unlock() {
-  return mutex.Unlock();
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "network stream unlock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::Read (void* dest, size_t size) {
   LockGuard lg (*this);
-  if (sock < 0)
-    return ESP_ERR_INVALID_STATE;
+  ESP_RETURN_ON_FALSE (sock >= 0, ESP_ERR_INVALID_STATE, TAG, "network stream is closed");
   if (!size)
     return ESP_OK;
  
@@ -43,62 +54,68 @@ esp_err_t NetworkStream::Read (void* dest, size_t size) {
   if (!size)
     return ESP_OK;
 
-  if (errno == EAGAIN)
-    return ESP_ERR_TIMEOUT;
+  ESP_RETURN_ON_FALSE (errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "network stream read timeout");
 
   Close();
-  return ESP_FAIL;
+  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "network stream read failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::Write (const void* src, size_t size) {
   LockGuard lg (*this);
-  if (sock < 0)
-    return ESP_ERR_INVALID_STATE;
+  ESP_RETURN_ON_FALSE (sock >= 0, ESP_ERR_INVALID_STATE, TAG, "network stream is closed");
   if (!size)
     return ESP_OK;
-  if (!src)
-    return ESP_ERR_INVALID_ARG;
+  ESP_RETURN_ON_FALSE (src, ESP_ERR_INVALID_ARG, TAG, "src is null");
   
   if (send (sock, src, size, 0) == size)
     return ESP_OK;
 
   Close();
-  return ESP_FAIL;
+  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "network stream write failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::Close() {
   LockGuard lg (*this);
+  if (sock < 0)
+    return ESP_OK;
   int s = sock;
   sock = -1;
-  return (s >= 0)?((close (s) == 0)?(ESP_OK):(ESP_FAIL)):(ESP_OK);
+  ESP_RETURN_ON_FALSE (close (s) == 0, ESP_FAIL, TAG, "network stream close failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::EnableNagleAlgorithm() {
-  return SetSocketOption (IPPROTO_TCP, TCP_NODELAY, 0);
+  ESP_RETURN_ON_ERROR (SetSocketOption (IPPROTO_TCP, TCP_NODELAY, 0), TAG, "Nagle's algorithm enable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::DisableNagleAlgorithm() {
-  return SetSocketOption (IPPROTO_TCP, TCP_NODELAY, 1);
+  ESP_RETURN_ON_ERROR (SetSocketOption (IPPROTO_TCP, TCP_NODELAY, 1), TAG, "Nagle's algorithm disable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::EnableKeepAlive() {
-  return SetSocketOption (SOL_SOCKET, SO_KEEPALIVE, 1);
+  ESP_RETURN_ON_ERROR (SetSocketOption (SOL_SOCKET, SO_KEEPALIVE, 1), TAG, "keep-alive enable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::DisableKeepAlive() {
-  return SetSocketOption (SOL_SOCKET, SO_KEEPALIVE, 0);
+  ESP_RETURN_ON_ERROR (SetSocketOption (SOL_SOCKET, SO_KEEPALIVE, 0), TAG, "keep-alive disable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -151,7 +168,8 @@ esp_err_t NetworkStream::SetReadTimeout (TickType_t timeout) {
     tv.tv_sec = timeoutMs / 1000;
     tv.tv_usec = (timeoutMs % 1000) * 1000;
   }
-  return (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0)?(ESP_OK):(ESP_FAIL);
+  ESP_RETURN_ON_FALSE (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "read timeout set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -181,19 +199,22 @@ NetworkEndpoint NetworkStream::GetRemoteEndpoint() {
 //==============================================================================
 
 esp_err_t NetworkStream::SetKeepAliveIdleTime (int seconds) {
-  return SetSocketOption (IPPROTO_TCP, TCP_KEEPIDLE, seconds);
+  ESP_RETURN_ON_ERROR (SetSocketOption (IPPROTO_TCP, TCP_KEEPIDLE, seconds), TAG, "keep-alive idle time set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::SetKeepAliveInterval (int seconds) {
-  return SetSocketOption (IPPROTO_TCP, TCP_KEEPINTVL, seconds);
+  ESP_RETURN_ON_ERROR (SetSocketOption (IPPROTO_TCP, TCP_KEEPINTVL, seconds), TAG, "keep-alive interval set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::SetKeepAliveCount (int count) {
-  return SetSocketOption (IPPROTO_TCP, TCP_KEEPCNT, count);
+  ESP_RETURN_ON_ERROR (SetSocketOption (IPPROTO_TCP, TCP_KEEPCNT, count), TAG, "keep-alive count set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -202,7 +223,8 @@ esp_err_t NetworkStream::SetSocketOption (int level, int option, int value) {
   LockGuard lg (*this);
   if (sock < 0)
     return ESP_OK;
-  return (setsockopt (sock, level, option, (void*)&value, sizeof (value)) >= 0)?(ESP_OK):(ESP_FAIL);
+  ESP_RETURN_ON_FALSE (setsockopt (sock, level, option, (void*)&value, sizeof (value)) >= 0, ESP_FAIL, TAG, "socket option set failed");
+  return ESP_OK;
 }
 
 //==============================================================================

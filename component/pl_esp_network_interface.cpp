@@ -1,5 +1,10 @@
 #include "pl_esp_network_interface.h"
+#include "esp_check.h"
 #include "esp_event.h"
+
+//==============================================================================
+
+static const char* TAG = "pl_esp_network_interface";
 
 //==============================================================================
 
@@ -15,30 +20,36 @@ EspNetworkInterface::~EspNetworkInterface() {
 
 esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
   LockGuard lg (*this);
-  if (!netif)
-    return ESP_ERR_INVALID_STATE;
-  return IsIpV4DhcpClientEnabled() ? ESP_OK : esp_netif_dhcpc_start (netif);
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  if (IsIpV4DhcpClientEnabled())
+    return ESP_OK;
+  ESP_RETURN_ON_ERROR (esp_netif_dhcpc_start (netif), TAG, "IPv4 DHCP client start failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspNetworkInterface::DisableIpV4DhcpClient() {
   LockGuard lg (*this);
-  if (!netif)
-    return ESP_ERR_INVALID_STATE;
-  return IsIpV4DhcpClientEnabled() ? esp_netif_dhcpc_stop (netif) : ESP_OK;
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  if (!IsIpV4DhcpClientEnabled())
+    return ESP_OK;
+  ESP_RETURN_ON_ERROR (esp_netif_dhcpc_stop (netif), TAG, "IPv4 DHCP client stop failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspNetworkInterface::EnableIpV6DhcpClient() {
-  return ESP_ERR_NOT_SUPPORTED;
+  ESP_RETURN_ON_ERROR (ESP_ERR_NOT_SUPPORTED, TAG, "IPv6 DHCP client is not supported");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspNetworkInterface::DisableIpV6DhcpClient() {
-  return ESP_ERR_NOT_SUPPORTED;
+  ESP_RETURN_ON_ERROR (ESP_ERR_NOT_SUPPORTED, TAG, "IPv6 DHCP client is not supported");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -72,12 +83,12 @@ IpV4Address EspNetworkInterface::GetIpV4Address() {
 
 esp_err_t EspNetworkInterface::SetIpV4Address (IpV4Address address) {
   LockGuard lg (*this);
-  if (!netif)
-    return ESP_ERR_INVALID_STATE;
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
   esp_netif_ip_info_t ipInfo;
-  PL_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo));  
+  ESP_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo), TAG, "get IP info failed");  
   ipInfo.ip.addr = address.u32;
-  return esp_netif_set_ip_info (netif, &ipInfo);
+  ESP_RETURN_ON_ERROR (esp_netif_set_ip_info (netif, &ipInfo), TAG, "set IP info failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -94,12 +105,12 @@ IpV4Address EspNetworkInterface::GetIpV4Netmask() {
 
 esp_err_t EspNetworkInterface::SetIpV4Netmask (IpV4Address netmask) {
   LockGuard lg (*this);
-  if (!netif)
-    return ESP_ERR_INVALID_STATE;
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
   esp_netif_ip_info_t ipInfo;
-  PL_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo));  
+  ESP_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo), TAG, "get IP info failed");  
   ipInfo.netmask.addr = netmask.u32;
-  return esp_netif_set_ip_info (netif, &ipInfo);
+  ESP_RETURN_ON_ERROR (esp_netif_set_ip_info (netif, &ipInfo), TAG, "set IP info failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -116,12 +127,12 @@ IpV4Address EspNetworkInterface::GetIpV4Gateway() {
 
 esp_err_t EspNetworkInterface::SetIpV4Gateway (IpV4Address gateway) {
   LockGuard lg (*this);
-  if (!netif)
-    return ESP_ERR_INVALID_STATE;
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
   esp_netif_ip_info_t ipInfo;
-  PL_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo));  
+  ESP_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo), TAG, "get IP info failed");  
   ipInfo.gw.addr = gateway.u32;
-  return esp_netif_set_ip_info (netif, &ipInfo);
+  ESP_RETURN_ON_ERROR (esp_netif_set_ip_info (netif, &ipInfo), TAG, "set IP info failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -147,7 +158,8 @@ IpV6Address EspNetworkInterface::GetIpV6GlobalAddress() {
 //==============================================================================
 
 esp_err_t EspNetworkInterface::SetIpV6GlobalAddress (IpV6Address address) {
-  return ESP_ERR_NOT_SUPPORTED;
+  ESP_RETURN_ON_ERROR (ESP_ERR_NOT_SUPPORTED, TAG, "set IPv6 global address is not supported");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -155,7 +167,8 @@ esp_err_t EspNetworkInterface::SetIpV6GlobalAddress (IpV6Address address) {
 esp_err_t EspNetworkInterface::Initialize (esp_netif_t* netif) {
   LockGuard lg (*this);
   this->netif = netif;
-  return esp_event_handler_instance_register (IP_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL);
+  ESP_RETURN_ON_ERROR (esp_event_handler_instance_register (IP_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
+  return ESP_OK;
 }
 
 //==============================================================================

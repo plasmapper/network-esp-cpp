@@ -90,8 +90,8 @@ void TestTcp() {
 esp_err_t TcpServer::HandleRequest (PL::NetworkStream& stream) {
   uint8_t dataByte;
   while (stream.GetReadableSize()) {
-    PL_RETURN_ON_ERROR (stream.Read (&dataByte, 1));
-    PL_RETURN_ON_ERROR (stream.Write (&dataByte, 1));
+    if (stream.Read (&dataByte, 1) == ESP_OK)
+      stream.Write (&dataByte, 1);
   }
   return ESP_OK;
 }

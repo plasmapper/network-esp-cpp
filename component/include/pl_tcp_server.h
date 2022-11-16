@@ -40,11 +40,11 @@ public:
   esp_err_t Enable() override;
   esp_err_t Disable() override;
 
-  /// @brief Enable the Nagle algorithm
+  /// @brief Enable the Nagle's algorithm
   /// @return error code
   esp_err_t EnableNagleAlgorithm();
   
-  /// @brief Disable the Nagle algorithm
+  /// @brief Disable the Nagle's algorithm
   /// @return error code
   esp_err_t DisableNagleAlgorithm();
 

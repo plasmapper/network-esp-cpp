@@ -1,5 +1,10 @@
 #include "pl_tcp_server.h"
 #include "lwip/sockets.h"
+#include "esp_check.h"
+
+//==============================================================================
+
+static const char* TAG = "pl_tcp_server";
 
 //==============================================================================
 
@@ -28,13 +33,20 @@ TcpServer::~TcpServer() {
 //==============================================================================
 
 esp_err_t TcpServer::Lock (TickType_t timeout) {
-  return mutex.Lock (timeout);
+  esp_err_t error = mutex.Lock (timeout);
+  if (error == ESP_OK)
+    return ESP_OK;
+  if (error == ESP_ERR_TIMEOUT && timeout == 0)
+    return ESP_ERR_TIMEOUT;
+  ESP_RETURN_ON_ERROR (error, TAG, "TCP server lock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t TcpServer::Unlock() {
-  return mutex.Unlock();
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "TCP server unlock failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -47,11 +59,12 @@ esp_err_t TcpServer::Enable() {
   status = Status::starting;
   if (xTaskCreatePinnedToCore (TaskCode, GetName().c_str(), taskParameters.stackDepth, this, taskParameters.priority, NULL, taskParameters.coreId) != pdPASS) {
     status = Status::stopped;
-    return ESP_FAIL;
+    ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "TCP server create task failed");
   }
   while (status == Status::starting)
     vTaskDelay(1);
-  return (status == Status::started)?(ESP_OK):(ESP_FAIL);
+  ESP_RETURN_ON_FALSE (status == Status::started, ESP_FAIL, TAG, "TCP server enable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -67,7 +80,9 @@ esp_err_t TcpServer::Disable() {
   for (auto& clientStream : clientStreams)
     clientStream->Close();
   clientStreams.clear();
-  return (status == Status::stopped)?(ESP_OK):(ESP_FAIL);
+
+  ESP_RETURN_ON_FALSE (status == Status::stopped, ESP_FAIL, TAG, "TCP server disable failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -75,7 +90,8 @@ esp_err_t TcpServer::Disable() {
 esp_err_t TcpServer::EnableNagleAlgorithm() {
   LockGuard lg (*this);
   this->nagleAlgorithmEnabled = true;
-  return SetStreamSocketOptions();
+  ESP_RETURN_ON_ERROR (SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -83,7 +99,8 @@ esp_err_t TcpServer::EnableNagleAlgorithm() {
 esp_err_t TcpServer::DisableNagleAlgorithm() {
   LockGuard lg (*this);
   this->nagleAlgorithmEnabled = false;
-  return SetStreamSocketOptions();
+  ESP_RETURN_ON_ERROR (SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -91,7 +108,8 @@ esp_err_t TcpServer::DisableNagleAlgorithm() {
 esp_err_t TcpServer::EnableKeepAlive() {
   LockGuard lg (*this);
   this->keepAliveEnabled = true;
-  return SetStreamSocketOptions();
+  ESP_RETURN_ON_ERROR (SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -99,7 +117,8 @@ esp_err_t TcpServer::EnableKeepAlive() {
 esp_err_t TcpServer::DisableKeepAlive() {
   LockGuard lg (*this);
   this->keepAliveEnabled = false;
-  return SetStreamSocketOptions();
+  ESP_RETURN_ON_ERROR (SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  return ESP_OK;
 }
 
 
@@ -122,7 +141,8 @@ uint16_t TcpServer::GetPort() {
 esp_err_t TcpServer::SetPort (uint16_t port) {
   LockGuard lg (*this);
   this->port = port;
-  return RestartIfEnabled();
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -137,7 +157,8 @@ size_t TcpServer::GetMaxNumberOfClients() {
 esp_err_t TcpServer::SetMaxNumberOfClients(size_t maxNumberOfClients) {
   LockGuard lg (*this);
   this->maxNumberOfClients = maxNumberOfClients;
-  return RestartIfEnabled();
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -152,7 +173,8 @@ std::vector<std::shared_ptr<NetworkStream>> TcpServer::GetClientStreams() {
 esp_err_t TcpServer::SetTaskParameters (const TaskParameters& taskParameters) {
   LockGuard lg (*this);
   this->taskParameters = taskParameters;
-  return RestartIfEnabled();
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -160,6 +182,8 @@ esp_err_t TcpServer::SetTaskParameters (const TaskParameters& taskParameters) {
 esp_err_t TcpServer::SetKeepAliveIdleTime (int seconds) {
   LockGuard lg (*this);
   this->keepAliveIdleTime = seconds;
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  return ESP_OK;
   return SetStreamSocketOptions();
 }
 
@@ -168,7 +192,8 @@ esp_err_t TcpServer::SetKeepAliveIdleTime (int seconds) {
 esp_err_t TcpServer::SetKeepAliveInterval (int seconds) {
   LockGuard lg (*this);
   this->keepAliveInterval = seconds;
-  return SetStreamSocketOptions();
+  ESP_RETURN_ON_ERROR (SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -176,7 +201,8 @@ esp_err_t TcpServer::SetKeepAliveInterval (int seconds) {
 esp_err_t TcpServer::SetKeepAliveCount (int count) {
   LockGuard lg (*this);
   this->keepAliveCount = count;
-  return SetStreamSocketOptions();
+  ESP_RETURN_ON_ERROR (SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -190,7 +216,8 @@ esp_err_t TcpServer::SetStreamSocketOptions() {
     error = clientStream->SetKeepAliveInterval (keepAliveInterval) == ESP_OK ? error : ESP_FAIL;
     error = clientStream->SetKeepAliveCount (keepAliveCount) == ESP_OK ? error : ESP_FAIL;
   }
-  return error;
+  ESP_RETURN_ON_ERROR (error, TAG, "stream socket options set failed");
+  return ESP_OK;
 }
 
 //==============================================================================
@@ -271,8 +298,9 @@ void TcpServer::TaskCode (void* parameters) {
 esp_err_t TcpServer::RestartIfEnabled() {
   if (status == Status::stopped)
     return ESP_OK;
-  PL_RETURN_ON_ERROR (Disable());
-  return Enable();
+  ESP_RETURN_ON_ERROR (Disable(), TAG, "TCP server disable failed");
+  ESP_RETURN_ON_ERROR (Enable(), TAG, "TCP server enable failed");
+  return ESP_OK;
 }
 
 //==============================================================================

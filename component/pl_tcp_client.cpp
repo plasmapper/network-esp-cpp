@@ -32,14 +32,14 @@ esp_err_t TcpClient::Lock (TickType_t timeout) {
     return ESP_OK;
   if (error == ESP_ERR_TIMEOUT && timeout == 0)
     return ESP_ERR_TIMEOUT;
-  ESP_RETURN_ON_ERROR (error, TAG, "TCP client lock failed");
+  ESP_RETURN_ON_ERROR (error, TAG, "mutex lock failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t TcpClient::Unlock() {
-  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "TCP client unlock failed");
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "mutex unlock failed");
   return ESP_OK;
 }
 
@@ -90,7 +90,7 @@ esp_err_t TcpClient::Connect() {
 
 esp_err_t TcpClient::Disconnect() {
   LockGuard lg (*this);
-  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "network stream close failed");
+  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "stream close failed");
   return ESP_OK;
 }
 
@@ -131,7 +131,7 @@ TickType_t TcpClient::GetReadTimeout() {
 esp_err_t TcpClient::SetReadTimeout (TickType_t timeout) {
   LockGuard lg (*this);
   this->readTimeout = timeout;
-  ESP_RETURN_ON_ERROR ( stream->SetReadTimeout(timeout), TAG, "read timeout set failed");
+  ESP_RETURN_ON_ERROR (stream->SetReadTimeout(timeout), TAG, "stream read timeout set failed");
   return ESP_OK;
 }
 
@@ -153,7 +153,7 @@ NetworkEndpoint TcpClient::GetRemoteEndpoint() {
 
 esp_err_t TcpClient::SetRemoteEndpoint (IpV4Address address, uint16_t port) {
   LockGuard lg (*this);
-  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "network stream close failed");
+  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "stream close failed");
   remoteEndpoint = NetworkEndpoint (address, port);
   return ESP_OK;
 }
@@ -162,7 +162,7 @@ esp_err_t TcpClient::SetRemoteEndpoint (IpV4Address address, uint16_t port) {
 
 esp_err_t TcpClient::SetRemoteEndpoint (IpV6Address address, uint16_t port) {
   LockGuard lg (*this);
-  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "network stream close failed");
+  ESP_RETURN_ON_ERROR (stream->Close(), TAG, "stream close failed");
   remoteEndpoint = NetworkEndpoint (address, port);
   return ESP_OK;
 }

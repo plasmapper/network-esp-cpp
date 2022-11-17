@@ -38,14 +38,14 @@ esp_err_t TcpServer::Lock (TickType_t timeout) {
     return ESP_OK;
   if (error == ESP_ERR_TIMEOUT && timeout == 0)
     return ESP_ERR_TIMEOUT;
-  ESP_RETURN_ON_ERROR (error, TAG, "TCP server lock failed");
+  ESP_RETURN_ON_ERROR (error, TAG, "mutex lock failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t TcpServer::Unlock() {
-  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "TCP server unlock failed");
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "mutex unlock failed");
   return ESP_OK;
 }
 
@@ -59,11 +59,11 @@ esp_err_t TcpServer::Enable() {
   status = Status::starting;
   if (xTaskCreatePinnedToCore (TaskCode, GetName().c_str(), taskParameters.stackDepth, this, taskParameters.priority, NULL, taskParameters.coreId) != pdPASS) {
     status = Status::stopped;
-    ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "TCP server create task failed");
+    ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "task create failed");
   }
   while (status == Status::starting)
     vTaskDelay(1);
-  ESP_RETURN_ON_FALSE (status == Status::started, ESP_FAIL, TAG, "TCP server enable failed");
+  ESP_RETURN_ON_FALSE (status == Status::started, ESP_FAIL, TAG, "enable failed");
   return ESP_OK;
 }
 
@@ -81,7 +81,7 @@ esp_err_t TcpServer::Disable() {
     clientStream->Close();
   clientStreams.clear();
 
-  ESP_RETURN_ON_FALSE (status == Status::stopped, ESP_FAIL, TAG, "TCP server disable failed");
+  ESP_RETURN_ON_FALSE (status == Status::stopped, ESP_FAIL, TAG, "disable failed");
   return ESP_OK;
 }
 
@@ -141,7 +141,7 @@ uint16_t TcpServer::GetPort() {
 esp_err_t TcpServer::SetPort (uint16_t port) {
   LockGuard lg (*this);
   this->port = port;
-  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "restart failed");
   return ESP_OK;
 }
 
@@ -157,7 +157,7 @@ size_t TcpServer::GetMaxNumberOfClients() {
 esp_err_t TcpServer::SetMaxNumberOfClients(size_t maxNumberOfClients) {
   LockGuard lg (*this);
   this->maxNumberOfClients = maxNumberOfClients;
-  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "restart failed");
   return ESP_OK;
 }
 
@@ -173,7 +173,7 @@ std::vector<std::shared_ptr<NetworkStream>> TcpServer::GetClientStreams() {
 esp_err_t TcpServer::SetTaskParameters (const TaskParameters& taskParameters) {
   LockGuard lg (*this);
   this->taskParameters = taskParameters;
-  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "restart failed");
   return ESP_OK;
 }
 
@@ -182,7 +182,7 @@ esp_err_t TcpServer::SetTaskParameters (const TaskParameters& taskParameters) {
 esp_err_t TcpServer::SetKeepAliveIdleTime (int seconds) {
   LockGuard lg (*this);
   this->keepAliveIdleTime = seconds;
-  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "TCP server restart failed");
+  ESP_RETURN_ON_ERROR (RestartIfEnabled(), TAG, "restart failed");
   return ESP_OK;
   return SetStreamSocketOptions();
 }
@@ -298,8 +298,8 @@ void TcpServer::TaskCode (void* parameters) {
 esp_err_t TcpServer::RestartIfEnabled() {
   if (status == Status::stopped)
     return ESP_OK;
-  ESP_RETURN_ON_ERROR (Disable(), TAG, "TCP server disable failed");
-  ESP_RETURN_ON_ERROR (Enable(), TAG, "TCP server enable failed");
+  ESP_RETURN_ON_ERROR (Disable(), TAG, "disable failed");
+  ESP_RETURN_ON_ERROR (Enable(), TAG, "enable failed");
   return ESP_OK;
 }
 

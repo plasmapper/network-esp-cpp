@@ -50,14 +50,14 @@ esp_err_t EspEthernet::Lock (TickType_t timeout) {
     return ESP_OK;
   if (error == ESP_ERR_TIMEOUT && timeout == 0)
     return ESP_ERR_TIMEOUT;
-  ESP_RETURN_ON_ERROR (error, TAG, "ESP ethernet lock failed");
+  ESP_RETURN_ON_ERROR (error, TAG, "mutex lock failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspEthernet::Unlock() {
-  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "ESP ethernet unlock failed");
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "mutex unlock failed");
   return ESP_OK;
 }
 
@@ -71,14 +71,14 @@ esp_err_t EspEthernet::Initialize() {
   esp_eth_phy_t* phy = phyNewFunction (&phyConfig);
   esp_eth_mac_t* mac = esp_eth_mac_new_esp32 (&macConfig);
   esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG (mac, phy);
-  ESP_RETURN_ON_ERROR (esp_eth_driver_install (&ethernetConfig, &handle), TAG, "ethernet driver install failed");
+  ESP_RETURN_ON_ERROR (esp_eth_driver_install (&ethernetConfig, &handle), TAG, "driver install failed");
   esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();
   netif = esp_netif_new (&netifConfig);
   netifGlueHandle = esp_eth_new_netif_glue (handle);
   ESP_RETURN_ON_ERROR (esp_netif_attach (netif, netifGlueHandle), TAG, "netif attach failed");
 
   ESP_RETURN_ON_ERROR (esp_event_handler_instance_register (ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
-  ESP_RETURN_ON_ERROR (EspNetworkInterface::Initialize (netif), TAG, "network interface initialize failed");
+  ESP_RETURN_ON_ERROR (EspNetworkInterface::Initialize (netif), TAG, "initialize failed");
   return ESP_OK;
 }
 
@@ -90,7 +90,7 @@ esp_err_t EspEthernet::Enable() {
   if (enabled)
     return ESP_OK;
 
-  ESP_RETURN_ON_ERROR (esp_eth_start (handle), TAG, "ethernet start failed");
+  ESP_RETURN_ON_ERROR (esp_eth_start (handle), TAG, "start failed");
   enabled = true;
   enabledEvent.Generate();
 
@@ -105,7 +105,7 @@ esp_err_t EspEthernet::Disable() {
   if (!enabled)
     return ESP_OK;
 
-  ESP_RETURN_ON_ERROR (esp_eth_stop (handle), TAG, "ethernet stop failed");
+  ESP_RETURN_ON_ERROR (esp_eth_stop (handle), TAG, "stop failed");
   enabled = false;
   disabledEvent.Generate();
 

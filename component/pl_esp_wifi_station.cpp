@@ -37,14 +37,14 @@ esp_err_t EspWiFiStation::Lock (TickType_t timeout) {
     return ESP_OK;
   if (error == ESP_ERR_TIMEOUT && timeout == 0)
     return ESP_ERR_TIMEOUT;
-  ESP_RETURN_ON_ERROR (error, TAG, "WiFi lock failed");
+  ESP_RETURN_ON_ERROR (error, TAG, "mutex lock failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspWiFiStation::Unlock() {
-  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "WiFi unlock failed");
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "mutex unlock failed");
   return ESP_OK;
 }
 
@@ -60,10 +60,10 @@ esp_err_t EspWiFiStation::Initialize() {
   config.sta.pmf_cfg.capable = true;
 
   netif = esp_netif_create_default_wifi_sta();
-  ESP_RETURN_ON_ERROR (esp_wifi_init (&wifiInitCfg), TAG, "WiFi init failed");
-  ESP_RETURN_ON_ERROR (esp_wifi_set_mode (WIFI_MODE_STA), TAG, "WiFi set mode failed");
-  ESP_RETURN_ON_ERROR (esp_wifi_set_ps (WIFI_PS_NONE), TAG, "WiFi set power save type failed");
-  ESP_RETURN_ON_ERROR (esp_wifi_set_config (WIFI_IF_STA, &config), TAG, "WiFi set config failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_init (&wifiInitCfg), TAG, "init failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_set_mode (WIFI_MODE_STA), TAG, "set mode failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_set_ps (WIFI_PS_NONE), TAG, "set power save type failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_set_config (WIFI_IF_STA, &config), TAG, "set config failed");
 
   ESP_RETURN_ON_ERROR (esp_event_handler_instance_register (WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
   ESP_RETURN_ON_ERROR (EspNetworkInterface::Initialize (netif), TAG, "network interface initialize failed");
@@ -79,12 +79,12 @@ esp_err_t EspWiFiStation::Enable() {
     return ESP_OK;
 
   wifi_config_t config;
-  ESP_RETURN_ON_ERROR (esp_wifi_get_config (WIFI_IF_STA, &config), TAG, "WiFi get config failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_get_config (WIFI_IF_STA, &config), TAG, "get config failed");
   snprintf ((char*)config.sta.ssid, sizeof (config.sta.ssid), ssid.c_str());
   snprintf ((char*)config.sta.password, sizeof (config.sta.password), password.c_str());
-  ESP_RETURN_ON_ERROR (esp_wifi_set_config (WIFI_IF_STA, &config), TAG, "WiFi set config failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_set_config (WIFI_IF_STA, &config), TAG, "set config failed");
 
-  ESP_RETURN_ON_ERROR (esp_wifi_start(), TAG, "WiFi start failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_start(), TAG, "start failed");
   enabled = true;
   enabledEvent.Generate();
 
@@ -98,7 +98,7 @@ esp_err_t EspWiFiStation::Disable() {
   ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "WiFi is not initialized");
   if (!enabled)
     return ESP_OK;
-  ESP_RETURN_ON_ERROR (esp_wifi_stop(), TAG, "WiFi stop failed");
+  ESP_RETURN_ON_ERROR (esp_wifi_stop(), TAG, "stop failed");
   enabled = false;
   disabledEvent.Generate();
 

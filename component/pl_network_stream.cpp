@@ -23,14 +23,14 @@ esp_err_t NetworkStream::Lock (TickType_t timeout) {
     return ESP_OK;
   if (error == ESP_ERR_TIMEOUT && timeout == 0)
     return ESP_ERR_TIMEOUT;
-  ESP_RETURN_ON_ERROR (error, TAG, "network stream lock failed");
+  ESP_RETURN_ON_ERROR (error, TAG, "mutex lock failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::Unlock() {
-  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "network stream unlock failed");
+  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "mutex unlock failed");
   return ESP_OK;
 }
 
@@ -41,6 +41,7 @@ esp_err_t NetworkStream::Read (void* dest, size_t size) {
   ESP_RETURN_ON_FALSE (sock >= 0, ESP_ERR_INVALID_STATE, TAG, "network stream is closed");
   if (!size)
     return ESP_OK;
+  bool flush = (size == SIZE_MAX);
  
   int res;
   if (dest) {
@@ -51,13 +52,13 @@ esp_err_t NetworkStream::Read (void* dest, size_t size) {
     for (; size && recv (sock, &data, 1, 0) == 1; size--);
   }
 
-  if (!size)
+  if (!size || (errno == EAGAIN && flush))
     return ESP_OK;
 
-  ESP_RETURN_ON_FALSE (errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "network stream read timeout");
+  ESP_RETURN_ON_FALSE (errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");
 
   Close();
-  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "network stream read failed");
+  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "read failed");
   return ESP_OK;
 }
 
@@ -74,7 +75,7 @@ esp_err_t NetworkStream::Write (const void* src, size_t size) {
     return ESP_OK;
 
   Close();
-  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "network stream write failed");
+  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "write failed");
   return ESP_OK;
 }
 
@@ -86,7 +87,7 @@ esp_err_t NetworkStream::Close() {
     return ESP_OK;
   int s = sock;
   sock = -1;
-  ESP_RETURN_ON_FALSE (close (s) == 0, ESP_FAIL, TAG, "network stream close failed");
+  ESP_RETURN_ON_FALSE (close (s) == 0, ESP_FAIL, TAG, "close failed");
   return ESP_OK;
 }
 
@@ -168,7 +169,7 @@ esp_err_t NetworkStream::SetReadTimeout (TickType_t timeout) {
     tv.tv_sec = timeoutMs / 1000;
     tv.tv_usec = (timeoutMs % 1000) * 1000;
   }
-  ESP_RETURN_ON_FALSE (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "read timeout set failed");
+  ESP_RETURN_ON_FALSE (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "socket option set failed");
   return ESP_OK;
 }
 

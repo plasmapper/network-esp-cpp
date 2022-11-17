@@ -20,10 +20,10 @@ EspNetworkInterface::~EspNetworkInterface() {
 
 esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
   LockGuard lg (*this);
-  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   if (IsIpV4DhcpClientEnabled())
     return ESP_OK;
-  ESP_RETURN_ON_ERROR (esp_netif_dhcpc_start (netif), TAG, "IPv4 DHCP client start failed");
+  ESP_RETURN_ON_ERROR (esp_netif_dhcpc_start (netif), TAG, "start failed");
   return ESP_OK;
 }
 
@@ -31,10 +31,10 @@ esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
 
 esp_err_t EspNetworkInterface::DisableIpV4DhcpClient() {
   LockGuard lg (*this);
-  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   if (!IsIpV4DhcpClientEnabled())
     return ESP_OK;
-  ESP_RETURN_ON_ERROR (esp_netif_dhcpc_stop (netif), TAG, "IPv4 DHCP client stop failed");
+  ESP_RETURN_ON_ERROR (esp_netif_dhcpc_stop (netif), TAG, "stop failed");
   return ESP_OK;
 }
 
@@ -83,7 +83,7 @@ IpV4Address EspNetworkInterface::GetIpV4Address() {
 
 esp_err_t EspNetworkInterface::SetIpV4Address (IpV4Address address) {
   LockGuard lg (*this);
-  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   esp_netif_ip_info_t ipInfo;
   ESP_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo), TAG, "get IP info failed");  
   ipInfo.ip.addr = address.u32;
@@ -105,7 +105,7 @@ IpV4Address EspNetworkInterface::GetIpV4Netmask() {
 
 esp_err_t EspNetworkInterface::SetIpV4Netmask (IpV4Address netmask) {
   LockGuard lg (*this);
-  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   esp_netif_ip_info_t ipInfo;
   ESP_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo), TAG, "get IP info failed");  
   ipInfo.netmask.addr = netmask.u32;
@@ -127,7 +127,7 @@ IpV4Address EspNetworkInterface::GetIpV4Gateway() {
 
 esp_err_t EspNetworkInterface::SetIpV4Gateway (IpV4Address gateway) {
   LockGuard lg (*this);
-  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   esp_netif_ip_info_t ipInfo;
   ESP_RETURN_ON_ERROR (esp_netif_get_ip_info (netif, &ipInfo), TAG, "get IP info failed");  
   ipInfo.gw.addr = gateway.u32;

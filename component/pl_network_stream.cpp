@@ -87,7 +87,7 @@ esp_err_t NetworkStream::Close() {
     return ESP_OK;
   int s = sock;
   sock = -1;
-  ESP_RETURN_ON_FALSE (close (s) == 0, ESP_FAIL, TAG, "close failed");
+  ESP_RETURN_ON_FALSE (close (s) == 0, ESP_FAIL, TAG, "socket close failed");
   return ESP_OK;
 }
 

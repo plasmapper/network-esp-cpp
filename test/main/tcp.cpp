@@ -1,5 +1,6 @@
 #include "tcp.h"
 #include "unity.h"
+#include "esp_check.h"
 
 //==============================================================================
 
@@ -9,6 +10,9 @@ const PL::IpV4Address ipV4Address (127, 0, 0, 1);
 const PL::IpV6Address ipV6Address (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
 const TickType_t readTimeout = 1000 / portTICK_PERIOD_MS;
 const uint8_t dataToSend[] = {1, 2, 3, 4, 5};
+const uint8_t disableDataToSend[] = {0xFE, 0, 0, 0, 0};
+const uint8_t restartDataToSend[] = {0xFF, 0, 0, 0, 0};
+static const char* TAG = "pl_tcp_server_test";
 
 //==============================================================================
 
@@ -81,6 +85,21 @@ void TestTcp() {
   vTaskDelay (10);
   TEST_ASSERT_EQUAL (0, server.GetClientStreams().size());
 
+  // Test server disable and restart from request
+  TEST_ASSERT (ipV4Client.Connect() == ESP_OK);
+  TEST_ASSERT (ipV4Client.IsConnected());
+  TEST_ASSERT (ipV4Client.GetStream()->Write (disableDataToSend, sizeof (disableDataToSend)) == ESP_OK);
+  vTaskDelay (10);
+  TEST_ASSERT (!server.IsEnabled());
+
+  TEST_ASSERT (server.Enable() == ESP_OK);
+  TEST_ASSERT (server.IsEnabled());
+  TEST_ASSERT (ipV4Client.Connect() == ESP_OK);
+  TEST_ASSERT (ipV4Client.IsConnected());
+  TEST_ASSERT (ipV4Client.GetStream()->Write (restartDataToSend, sizeof (restartDataToSend)) == ESP_OK);
+  vTaskDelay (10);
+  TEST_ASSERT (server.IsEnabled());
+
   TEST_ASSERT (server.Disable() == ESP_OK);
   TEST_ASSERT (!server.IsEnabled());
 }
@@ -90,8 +109,15 @@ void TestTcp() {
 esp_err_t TcpServer::HandleRequest (PL::NetworkStream& stream) {
   uint8_t dataByte;
   while (stream.GetReadableSize()) {
-    if (stream.Read (&dataByte, 1) == ESP_OK)
+    if (stream.Read (&dataByte, 1) == ESP_OK) {
       stream.Write (&dataByte, 1);
+      if (dataByte == disableDataToSend[0])
+        ESP_RETURN_ON_ERROR (Disable(), TAG, "server disable failed");
+      if (dataByte == restartDataToSend[0]) {
+        ESP_RETURN_ON_ERROR (Disable(), TAG, "server disable failed");
+        ESP_RETURN_ON_ERROR (Enable(), TAG, "server enable failed");
+      }
+    }      
   }
   return ESP_OK;
 }

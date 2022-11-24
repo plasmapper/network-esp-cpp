@@ -76,6 +76,7 @@ esp_err_t TcpServer::Enable() {
 esp_err_t TcpServer::Disable() {
   LockGuard lg (*this);
   if (handlingRequest) {
+    enableFromRequest = false;
     disableFromRequest = true;
     return ESP_OK;
   }

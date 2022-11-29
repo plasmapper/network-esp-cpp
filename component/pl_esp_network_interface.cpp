@@ -21,9 +21,12 @@ EspNetworkInterface::~EspNetworkInterface() {
 esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
   LockGuard lg (*this);
   ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
+  
   esp_err_t error = esp_netif_dhcpc_start (netif);
-  if (error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED)
+  if (error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED) {
+    ipV4DhcpClientEnabled = true;
     return ESP_OK;
+  }
   ESP_RETURN_ON_ERROR (error, TAG, "start failed");
   return ESP_OK;
 }
@@ -33,9 +36,12 @@ esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
 esp_err_t EspNetworkInterface::DisableIpV4DhcpClient() {
   LockGuard lg (*this);
   ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
+
   esp_err_t error = esp_netif_dhcpc_stop (netif);
-  if (error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED)
+  if (error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED) {
+    ipV4DhcpClientEnabled = false;
     return ESP_OK;
+  }
   ESP_RETURN_ON_ERROR (error, TAG, "stop failed");
   return ESP_OK;
 }
@@ -60,8 +66,12 @@ bool EspNetworkInterface::IsIpV4DhcpClientEnabled() {
   LockGuard lg (*this);
   if (!netif)
     return false;
-  esp_netif_dhcp_status_t status;
-  return esp_netif_dhcpc_get_status (netif, &status) == ESP_OK ? (status == ESP_NETIF_DHCP_STARTED) : false;
+  if (IsConnected()) {
+    esp_netif_dhcp_status_t status;
+    return esp_netif_dhcpc_get_status (netif, &status) == ESP_OK ? (status == ESP_NETIF_DHCP_STARTED) : false;
+  }
+  else
+    return ipV4DhcpClientEnabled;
 }
 
 //==============================================================================

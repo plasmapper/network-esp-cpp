@@ -172,7 +172,12 @@ void EspWiFiStation::EventHandler (void* arg, esp_event_base_t eventBase, int32_
     if (eventID == WIFI_EVENT_STA_CONNECTED) {
       esp_netif_create_ip6_linklocal (wifiStation.netif);
       if (!wifiStation.connected) {
+        bool ipV4DhcpClientEnabled = wifiStation.IsIpV4DhcpClientEnabled();
         wifiStation.connected = true;
+        if (ipV4DhcpClientEnabled)
+          wifiStation.EnableIpV4DhcpClient();
+        else
+          wifiStation.DisableIpV4DhcpClient();
         wifiStation.connectedEvent.Generate();
       }
     }

@@ -18,11 +18,11 @@ void TestEthernet() {
   
   TEST_ASSERT (ethernet.Enable() == ESP_OK);
   TEST_ASSERT (ethernet.IsEnabled());
+  TEST_ASSERT (ethernet.EnableIpV4DhcpClient() == ESP_OK);
+  TEST_ASSERT (ethernet.IsIpV4DhcpClientEnabled());
   vTaskDelay (connectionTimeout);
   TEST_ASSERT (ethernet.IsConnected());
   
-  TEST_ASSERT (ethernet.EnableIpV4DhcpClient() == ESP_OK);
-  TEST_ASSERT (ethernet.IsIpV4DhcpClientEnabled());
   TEST_ASSERT (ethernet.GetIpV4Address().u32);
   TEST_ASSERT (ethernet.GetIpV4Netmask().u32);
   TEST_ASSERT (ethernet.GetIpV4Gateway().u32);

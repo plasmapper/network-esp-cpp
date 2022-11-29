@@ -23,11 +23,11 @@ void TestWiFi() {
   
   TEST_ASSERT (wifi.Enable() == ESP_OK);
   TEST_ASSERT (wifi.IsEnabled());
+  TEST_ASSERT (wifi.EnableIpV4DhcpClient() == ESP_OK);
+  TEST_ASSERT (wifi.IsIpV4DhcpClientEnabled());
   vTaskDelay (connectionTimeout);
   TEST_ASSERT (wifi.IsConnected());
   
-  TEST_ASSERT (wifi.EnableIpV4DhcpClient() == ESP_OK);
-  TEST_ASSERT (wifi.IsIpV4DhcpClientEnabled());
   TEST_ASSERT (wifi.GetIpV4Address().u32);
   TEST_ASSERT (wifi.GetIpV4Netmask().u32);
   TEST_ASSERT (wifi.GetIpV4Gateway().u32);

@@ -36,6 +36,7 @@ extern "C" void app_main(void) {
   ethernet.lostIpV6AddressEvent.AddHandler (logger, &Logger::OnLostIpV6Address);
 
   ethernet.Initialize();
+  ethernet.EnableIpV4DhcpClient();
   ethernet.Enable();
 
   while (1) {

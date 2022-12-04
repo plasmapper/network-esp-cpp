@@ -39,6 +39,7 @@ extern "C" void app_main(void) {
   wifi.Initialize();
   wifi.SetSsid (wifiSsid);
   wifi.SetPassword (wifiPassword);
+  wifi.EnableIpV4DhcpClient();
   wifi.Enable();
 
   while (1) {

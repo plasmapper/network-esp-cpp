@@ -53,6 +53,7 @@ extern "C" void app_main(void) {
   server.clientConnectedEvent.AddHandler (clientEventHandler, &ClientEventHandler::OnClientConnected);
   server.clientDisconnectedEvent.AddHandler (clientEventHandler, &ClientEventHandler::OnClientDisconnected);
 
+  wifi.EnableIpV4DhcpClient();
   wifi.Enable();
 
   while (1) {

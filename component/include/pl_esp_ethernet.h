@@ -47,6 +47,7 @@ private:
   PhyNewFunction phyNewFunction;
   eth_phy_config_t phyConfig = ETH_PHY_DEFAULT_CONFIG();
   eth_mac_config_t macConfig = ETH_MAC_DEFAULT_CONFIG();
+  eth_esp32_emac_config_t esp32EmacConfig = ETH_ESP32_EMAC_DEFAULT_CONFIG();
   esp_eth_handle_t handle = NULL;
   esp_eth_netif_glue_handle_t netifGlueHandle = NULL;
 

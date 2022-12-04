@@ -17,7 +17,7 @@ public:
 //==============================================================================
 
 // Ethernet with KSZ8081 chip. Phy address: 0. Reset pin: 5. MDC pin: 23. MDIO pin: 18.
-PL::EspEthernet ethernet (esp_eth_phy_new_ksz8081, 0, 5, 23, 18);
+PL::EspEthernet ethernet (esp_eth_phy_new_ksz80xx, 0, 5, 23, 18);
 auto logger = std::make_shared<Logger>();
 
 //==============================================================================

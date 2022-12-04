@@ -12,7 +12,7 @@ const TickType_t connectionTimeout = 3000 / portTICK_PERIOD_MS;
 
 void TestEthernet() {
   // Ethernet with KSZ8081 chip. Phy address: 0. Reset pin: 5. MDC pin: 23. MDIO pin: 18.
-  PL::EspEthernet ethernet (esp_eth_phy_new_ksz8081, 0, 5, 23, 18);
+  PL::EspEthernet ethernet (esp_eth_phy_new_ksz80xx, 0, 5, 23, 18);
 
   TEST_ASSERT (ethernet.Initialize() == ESP_OK);
   

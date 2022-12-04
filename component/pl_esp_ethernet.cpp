@@ -19,8 +19,8 @@ const std::string EspEthernet::defaultName = "Ethernet";
 EspEthernet::EspEthernet (PhyNewFunction phyNewFunction, int32_t phyAddress, int resetPin, int mdcPin, int mdioPin) : phyNewFunction (phyNewFunction) {
   phyConfig.phy_addr = phyAddress;
   phyConfig.reset_gpio_num = resetPin;
-  macConfig.smi_mdc_gpio_num = mdcPin;
-  macConfig.smi_mdio_gpio_num = mdioPin;
+  esp32EmacConfig.smi_mdc_gpio_num = mdcPin;
+  esp32EmacConfig.smi_mdio_gpio_num = mdioPin;
 
   SetName (defaultName);
 }
@@ -69,7 +69,7 @@ esp_err_t EspEthernet::Initialize() {
     return ESP_OK;
 
   esp_eth_phy_t* phy = phyNewFunction (&phyConfig);
-  esp_eth_mac_t* mac = esp_eth_mac_new_esp32 (&macConfig);
+  esp_eth_mac_t* mac = esp_eth_mac_new_esp32 (&esp32EmacConfig, &macConfig);
   esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG (mac, phy);
   ESP_RETURN_ON_ERROR (esp_eth_driver_install (&ethernetConfig, &handle), TAG, "driver install failed");
   esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();

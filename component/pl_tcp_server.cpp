@@ -53,7 +53,7 @@ esp_err_t TcpServer::Unlock() {
 
 esp_err_t TcpServer::Enable() {
   LockGuard lg (*this);
-  if (handlingRequest) {
+  if (taskHandle && taskHandle == xTaskGetCurrentTaskHandle()) {
     enableFromRequest = true;
     return ESP_OK;
   }
@@ -61,7 +61,8 @@ esp_err_t TcpServer::Enable() {
     return ESP_OK;
   
   status = Status::starting;
-  if (xTaskCreatePinnedToCore (TaskCode, GetName().c_str(), taskParameters.stackDepth, this, taskParameters.priority, NULL, taskParameters.coreId) != pdPASS) {
+  if (xTaskCreatePinnedToCore (TaskCode, GetName().c_str(), taskParameters.stackDepth, this, taskParameters.priority, &taskHandle, taskParameters.coreId) != pdPASS) {
+    taskHandle = NULL;
     status = Status::stopped;
     ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "task create failed");
   }
@@ -75,7 +76,7 @@ esp_err_t TcpServer::Enable() {
 
 esp_err_t TcpServer::Disable() {
   LockGuard lg (*this);
-  if (handlingRequest) {
+  if (taskHandle && taskHandle == xTaskGetCurrentTaskHandle()) {
     enableFromRequest = false;
     disableFromRequest = true;
     return ESP_OK;
@@ -89,7 +90,6 @@ esp_err_t TcpServer::Disable() {
 
   for (auto& clientStream : clientStreams)
     clientStream->Close();
-  clientStreams.clear();
 
   ESP_RETURN_ON_FALSE (status == Status::stopped, ESP_FAIL, TAG, "disable failed");
   return ESP_OK;
@@ -234,7 +234,7 @@ esp_err_t TcpServer::SetStreamSocketOptions() {
 
 void TcpServer::TaskCode (void* parameters) {
   TcpServer& server = *(TcpServer*)parameters;
-  bool listenFailed = false;;
+  bool listenFailed = false;
 
   server.status = Status::started;
   server.enabledEvent.Generate();
@@ -301,23 +301,19 @@ void TcpServer::TaskCode (void* parameters) {
             else
               noPendingConnections = true;
           }
+          auto clientStreams = server.clientStreams;
+          server.Unlock();
 
           // Handle requests
-          for (auto& clientStream : server.clientStreams) {
-            if (clientStream->GetReadableSize()) {
-              server.handlingRequest = true;
+          for (auto& clientStream : clientStreams) {
+            if (clientStream->GetReadableSize())
               server.HandleRequest (*clientStream);
-              server.handlingRequest = false;
-            }
           }
 
           if (server.disableFromRequest) {
-            for (auto& clientStream : server.clientStreams)
+            for (auto& clientStream : clientStreams)
               clientStream->Close();
-            server.clientStreams.clear();
           }
-          
-          server.Unlock();
         }
         vTaskDelay(1);
       }
@@ -331,6 +327,7 @@ void TcpServer::TaskCode (void* parameters) {
   }
 
   server.disableFromRequest = false;
+  server.taskHandle = NULL;
   server.status = Status::stopped;
   server.disabledEvent.Generate();
 

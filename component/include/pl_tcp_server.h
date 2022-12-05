@@ -96,7 +96,6 @@ protected:
 
 private:
   Mutex mutex;
-  enum class Status {stopped, starting, started, stopping} status = Status::stopped;
   uint16_t port = 0;
   int maxNumberOfClients = defaultMaxNumberOfClients;
   std::vector<std::shared_ptr<NetworkStream>> clientStreams;
@@ -107,12 +106,14 @@ private:
   int keepAliveInterval = defaultKeepAliveInterval;
   int keepAliveCount = defaultKeepAliveCount;
   TaskHandle_t taskHandle = NULL;
+  bool disable = false;
   bool disableFromRequest = false;
   bool enableFromRequest = false;
 
   esp_err_t SetStreamSocketOptions();
   static void TaskCode (void* parameters);
 
+  int Listen();
   esp_err_t RestartIfEnabled(); 
 };
 

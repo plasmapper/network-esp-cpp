@@ -87,7 +87,7 @@ esp_err_t NetworkStream::Close() {
     return ESP_OK;
   int s = sock;
   sock = -1;
-  ESP_RETURN_ON_FALSE (close (s) == 0, ESP_FAIL, TAG, "socket close failed");
+  ESP_RETURN_ON_FALSE (close (s) == 0, ESP_FAIL, TAG, "socket close failed (%d)", errno);
   return ESP_OK;
 }
 
@@ -169,7 +169,7 @@ esp_err_t NetworkStream::SetReadTimeout (TickType_t timeout) {
     tv.tv_sec = timeoutMs / 1000;
     tv.tv_usec = (timeoutMs % 1000) * 1000;
   }
-  ESP_RETURN_ON_FALSE (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "socket option set failed");
+  ESP_RETURN_ON_FALSE (setsockopt (sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "socket option set failed (%d)", errno);
   return ESP_OK;
 }
 
@@ -224,7 +224,7 @@ esp_err_t NetworkStream::SetSocketOption (int level, int option, int value) {
   LockGuard lg (*this);
   if (sock < 0)
     return ESP_OK;
-  ESP_RETURN_ON_FALSE (setsockopt (sock, level, option, (void*)&value, sizeof (value)) >= 0, ESP_FAIL, TAG, "socket option set failed");
+  ESP_RETURN_ON_FALSE (setsockopt (sock, level, option, (void*)&value, sizeof (value)) >= 0, ESP_FAIL, TAG, "socket option set failed (%d)", errno);
   return ESP_OK;
 }
 

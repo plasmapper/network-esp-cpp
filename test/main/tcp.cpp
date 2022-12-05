@@ -23,6 +23,7 @@ void TestTcp() {
   TEST_ASSERT (server.SetMaxNumberOfClients (maxNumberOfClients) == ESP_OK);
   TEST_ASSERT_EQUAL (maxNumberOfClients, server.GetMaxNumberOfClients());
   TEST_ASSERT (server.Enable() == ESP_OK);
+  vTaskDelay (10);
   TEST_ASSERT (server.IsEnabled());
 
   PL::TcpClient ipV4Client (ipV4Address, port);

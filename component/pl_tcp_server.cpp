@@ -21,13 +21,12 @@ TcpServer::TcpServer (uint16_t port) : clientConnectedEvent (*this), clientDisco
 //==============================================================================
 
 TcpServer::~TcpServer() {
-  if (status != Status::stopped) {
-    status = Status::stopping;
-    while (status == Status::stopping)
-      vTaskDelay(1);
-    for (auto& clientStream : clientStreams)
-      clientStream->Close();
+  while (taskHandle) {
+    disable = true;
+    vTaskDelay(1);
   }
+  for (auto& clientStream : clientStreams)
+    clientStream->Close();
 }
 
 //==============================================================================
@@ -53,22 +52,19 @@ esp_err_t TcpServer::Unlock() {
 
 esp_err_t TcpServer::Enable() {
   LockGuard lg (*this);
-  if (taskHandle && taskHandle == xTaskGetCurrentTaskHandle()) {
+  if (taskHandle == xTaskGetCurrentTaskHandle()) {
     enableFromRequest = true;
     return ESP_OK;
   }
-  if (status == Status::started)
+  if (taskHandle)
     return ESP_OK;
   
-  status = Status::starting;
+  disable = false;
   if (xTaskCreatePinnedToCore (TaskCode, GetName().c_str(), taskParameters.stackDepth, this, taskParameters.priority, &taskHandle, taskParameters.coreId) != pdPASS) {
     taskHandle = NULL;
-    status = Status::stopped;
     ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "task create failed");
   }
-  while (status == Status::starting)
-    vTaskDelay(1);
-  ESP_RETURN_ON_FALSE (status == Status::started, ESP_FAIL, TAG, "enable failed");
+  enabledEvent.Generate();
   return ESP_OK;
 }
 
@@ -81,17 +77,15 @@ esp_err_t TcpServer::Disable() {
     disableFromRequest = true;
     return ESP_OK;
   }
-  if (status == Status::stopped)
-    return ESP_OK;
-
-  status = Status::stopping;
-  while (status == Status::stopping)
+  
+  while (taskHandle) {
+    disable = true;
     vTaskDelay(1);
+  }
 
   for (auto& clientStream : clientStreams)
     clientStream->Close();
-
-  ESP_RETURN_ON_FALSE (status == Status::stopped, ESP_FAIL, TAG, "disable failed");
+  clientStreams.clear();
   return ESP_OK;
 }
 
@@ -136,7 +130,7 @@ esp_err_t TcpServer::DisableKeepAlive() {
 
 bool TcpServer::IsEnabled() {
   LockGuard lg (*this);
-  return status == Status::started;
+  return taskHandle;
 }
 
 //==============================================================================
@@ -234,110 +228,110 @@ esp_err_t TcpServer::SetStreamSocketOptions() {
 
 void TcpServer::TaskCode (void* parameters) {
   TcpServer& server = *(TcpServer*)parameters;
-  bool listenFailed = false;
+  int sock = -1;
 
-  server.status = Status::started;
-  server.enabledEvent.Generate();
-
-  while (server.status != Status::stopping && !server.disableFromRequest && !listenFailed) {
-    int sock;
-    listenFailed = true;
-    if ((sock = socket (AF_INET6, SOCK_STREAM, IPPROTO_TCP)) >= 0) {
-      int enableAddressReuse = 1;
-      if (setsockopt (sock, SOL_SOCKET, SO_REUSEADDR, &enableAddressReuse, sizeof(enableAddressReuse)) == 0) {
-        sockaddr_in6 addr = {};
-        addr.sin6_family = AF_INET6;
-        addr.sin6_port = htons (server.port);
-        if (bind (sock, (sockaddr*)&addr, sizeof (addr)) == 0) {
-          if (listen (sock, server.maxNumberOfClients) == 0)
-            listenFailed = false;
+  while (!server.disable) {
+    if (server.Lock(0) == ESP_OK) {
+      if (sock >= 0 || (sock = server.Listen()) >= 0) {
+        // Remove disconnected clients
+        for (auto clientStream = server.clientStreams.begin(); clientStream != server.clientStreams.end();) {
+          if ((*clientStream)->IsOpen())
+            clientStream++;
           else {
-            ESP_LOGE (TAG, "socket listen failed (%d)", errno);
+            server.clientDisconnectedEvent.Generate (**clientStream);
+            server.clientStreams.erase (clientStream);
           }
         }
-        else {
-          ESP_LOGE (TAG, "socket bind failed (%d)", errno);
-        }
-      }
-      else {
-        ESP_LOGE (TAG, "socket set reuse address failed (%d)", errno);
-      }
 
-      if (listenFailed)
-        close (sock);
-    }
-    else { 
-      ESP_LOGE (TAG, "socket create failed (%d)", errno);
-    }
-
-    if (!listenFailed) {
-      while (server.status != Status::stopping && !server.disableFromRequest) {
-        if (server.Lock(0) == ESP_OK) {
-          // Remove disconnected clients
-          for (auto clientStream = server.clientStreams.begin(); clientStream != server.clientStreams.end();) {
-            if ((*clientStream)->IsOpen())
-              clientStream++;
-            else {
-              server.clientDisconnectedEvent.Generate (**clientStream);
-              server.clientStreams.erase (clientStream);
+        // Accept new clients
+        fd_set set;
+        timeval timeout = {};
+        for (bool noPendingConnections = false; server.clientStreams.size() < server.maxNumberOfClients && !noPendingConnections;) {
+          FD_ZERO (&set);
+          FD_SET (sock, &set);
+          if (select (sock + 1, &set, NULL, NULL, &timeout) > 0) {
+            int newClientSock = accept (sock, NULL, NULL);
+            if (newClientSock >= 0) {
+              auto clientStream = std::make_shared<NetworkStream>(newClientSock);
+              server.clientStreams.push_back (clientStream);
+              server.SetStreamSocketOptions();
+              server.clientConnectedEvent.Generate (*clientStream);
             }
           }
-
-          // Accept new clients
-          fd_set set;
-          timeval timeout = {};
-          for (bool noPendingConnections = false; server.clientStreams.size() < server.maxNumberOfClients && !noPendingConnections;) {
-            FD_ZERO (&set);
-            FD_SET (sock, &set);
-            if (select (sock + 1, &set, NULL, NULL, &timeout) > 0) {
-              int newClientSock = accept (sock, NULL, NULL);
-              if (newClientSock >= 0) {
-                auto clientStream = std::make_shared<NetworkStream>(newClientSock);
-                server.clientStreams.push_back (clientStream);
-                server.SetStreamSocketOptions();
-                server.clientConnectedEvent.Generate (*clientStream);
-              }
-            }
-            else
-              noPendingConnections = true;
-          }
-          auto clientStreams = server.clientStreams;
-          server.Unlock();
-
-          // Handle requests
-          for (auto& clientStream : clientStreams) {
-            if (clientStream->GetReadableSize())
-              server.HandleRequest (*clientStream);
-          }
-
-          if (server.disableFromRequest) {
-            for (auto& clientStream : clientStreams)
-              clientStream->Close();
-          }
+          else
+            noPendingConnections = true;
         }
-        vTaskDelay(1);
+
+        // Handle requests
+        for (auto& clientStream : server.clientStreams) {
+          LockGuard lg (*clientStream);
+          if (clientStream->GetReadableSize())
+            server.HandleRequest (*clientStream);
+        }
+
+        if (server.disableFromRequest) {
+          server.disableFromRequest = false;
+          for (auto& clientStream : server.clientStreams)
+            clientStream->Close();
+          server.clientStreams.clear();
+          close (sock);
+          sock = -1;
+          if (!server.enableFromRequest)
+            server.disable = true;
+        }
+        server.enableFromRequest = false;
       }
+      else
+        server.disable = true;
 
-      if (server.enableFromRequest)
-        server.disableFromRequest = false;
-      server.enableFromRequest = false;
-
-      close (sock);
+      server.Unlock();
     }
+    vTaskDelay(1);
   }
 
-  server.disableFromRequest = false;
-  server.taskHandle = NULL;
-  server.status = Status::stopped;
-  server.disabledEvent.Generate();
+  if (sock >= 0)
+    close (sock);
 
+  server.disabledEvent.Generate();
+  server.taskHandle = NULL;
   vTaskDelete (NULL);
 }
 
 //==============================================================================
 
+int TcpServer::Listen() {
+  int sock;
+  if ((sock = socket (AF_INET6, SOCK_STREAM, IPPROTO_TCP)) >= 0) {
+    int enableAddressReuse = 1;
+    if (setsockopt (sock, SOL_SOCKET, SO_REUSEADDR, &enableAddressReuse, sizeof(enableAddressReuse)) == 0) {
+      sockaddr_in6 addr = {};
+      addr.sin6_family = AF_INET6;
+      addr.sin6_port = htons (port);
+      if (bind (sock, (sockaddr*)&addr, sizeof (addr)) == 0) {
+        if (listen (sock, maxNumberOfClients) == 0)
+          return sock;
+        else
+          ESP_LOGE (TAG, "socket listen failed (%d)", errno);
+      }
+      else
+        ESP_LOGE (TAG, "socket bind failed (%d)", errno);
+    }
+    else
+      ESP_LOGE (TAG, "socket set reuse address failed (%d)", errno);
+
+    close (sock);
+    sock = -1;
+  }
+  else
+    ESP_LOGE (TAG, "socket create failed (%d)", errno);
+
+  return sock;
+}
+
+//==============================================================================
+
 esp_err_t TcpServer::RestartIfEnabled() {
-  if (status == Status::stopped || disableFromRequest)
+  if (!taskHandle || disableFromRequest)
     return ESP_OK;
   ESP_RETURN_ON_ERROR (Disable(), TAG, "disable failed");
   ESP_RETURN_ON_ERROR (Enable(), TAG, "enable failed");

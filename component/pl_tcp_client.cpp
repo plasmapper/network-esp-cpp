@@ -82,7 +82,7 @@ esp_err_t TcpClient::Connect() {
     }
     close (sock);
   }
-  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "socket create failed");
+  ESP_RETURN_ON_ERROR (ESP_FAIL, TAG, "socket create failed (%d)", errno);
   return ESP_OK;
 }
 

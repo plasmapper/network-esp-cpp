@@ -72,11 +72,13 @@ esp_err_t TcpServer::Enable() {
 
 esp_err_t TcpServer::Disable() {
   LockGuard lg (*this);
-  if (taskHandle && taskHandle == xTaskGetCurrentTaskHandle()) {
+  if (taskHandle == xTaskGetCurrentTaskHandle()) {
     enableFromRequest = false;
     disableFromRequest = true;
     return ESP_OK;
   }
+  if (!taskHandle)
+    return ESP_OK;
   
   while (taskHandle) {
     disable = true;
@@ -86,6 +88,8 @@ esp_err_t TcpServer::Disable() {
   for (auto& clientStream : clientStreams)
     clientStream->Close();
   clientStreams.clear();
+
+  disabledEvent.Generate();
   return ESP_OK;
 }
 
@@ -276,8 +280,13 @@ void TcpServer::TaskCode (void* parameters) {
           server.clientStreams.clear();
           close (sock);
           sock = -1;
-          if (!server.enableFromRequest)
-            server.disable = true;
+          if (!server.enableFromRequest) {
+            server.disabledEvent.Generate();
+            server.taskHandle = NULL;
+            server.Unlock();
+            vTaskDelete (NULL);
+            return;
+          }
         }
         server.enableFromRequest = false;
       }
@@ -291,8 +300,7 @@ void TcpServer::TaskCode (void* parameters) {
 
   if (sock >= 0)
     close (sock);
-
-  server.disabledEvent.Generate();
+  
   server.taskHandle = NULL;
   vTaskDelete (NULL);
 }

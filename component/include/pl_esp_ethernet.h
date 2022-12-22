@@ -10,7 +10,7 @@ namespace PL {
 //==============================================================================
 
 /// @brief Internal ESP Ethernet interface class
-class EspEthernet : public EspNetworkInterface {
+class EspEthernet : public EspNetworkInterface, public Ethernet {
 public:
   /// @brief PHY generator function
   typedef esp_eth_phy_t* (*PhyNewFunction)(const eth_phy_config_t*);

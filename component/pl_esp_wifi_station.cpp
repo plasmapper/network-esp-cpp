@@ -163,23 +163,19 @@ esp_err_t EspWiFiStation::SetPassword (const std::string& password) {
 
 void EspWiFiStation::EventHandler (void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData) {
   EspWiFiStation& wifiStation = *(EspWiFiStation*)arg;
-  LockGuard lg (wifiStation);
 
   if (eventBase == WIFI_EVENT) {
     if (eventID == WIFI_EVENT_STA_START) {
       esp_wifi_connect();
     }
     if (eventID == WIFI_EVENT_STA_CONNECTED) {
+      wifiStation.connected = true;
       esp_netif_create_ip6_linklocal (wifiStation.netif);
-      if (!wifiStation.connected) {
-        bool ipV4DhcpClientEnabled = wifiStation.IsIpV4DhcpClientEnabled();
-        wifiStation.connected = true;
-        if (ipV4DhcpClientEnabled)
-          wifiStation.EnableIpV4DhcpClient();
-        else
-          wifiStation.DisableIpV4DhcpClient();
-        wifiStation.connectedEvent.Generate();
-      }
+      
+      if (wifiStation.IsIpV4DhcpClientEnabled())
+        esp_netif_dhcpc_start (wifiStation.netif);
+      else
+        esp_netif_dhcpc_stop (wifiStation.netif);
     }
     if (eventID == WIFI_EVENT_STA_DISCONNECTED) {
       if (wifiStation.connected) {

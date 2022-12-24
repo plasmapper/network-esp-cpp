@@ -130,20 +130,16 @@ bool EspEthernet::IsConnected() {
 
 void EspEthernet::EventHandler (void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData) {
   EspEthernet& ethernet = *(EspEthernet*)arg;
-  LockGuard lg (ethernet);
 
   if (eventBase == ETH_EVENT) {
     if (eventID == ETHERNET_EVENT_CONNECTED) {
+      ethernet.connected = true;
       esp_netif_create_ip6_linklocal (ethernet.netif);
-      if (!ethernet.connected) {
-        bool ipV4DhcpClientEnabled = ethernet.IsIpV4DhcpClientEnabled();
-        ethernet.connected = true;
-        if (ipV4DhcpClientEnabled)
-          ethernet.EnableIpV4DhcpClient();
-        else
-          ethernet.DisableIpV4DhcpClient();
-        ethernet.connectedEvent.Generate();
-      }
+      
+      if (ethernet.IsIpV4DhcpClientEnabled())
+        esp_netif_dhcpc_start (ethernet.netif);
+      else
+        esp_netif_dhcpc_stop (ethernet.netif);
     }
     if (eventID == ETHERNET_EVENT_DISCONNECTED) {
       if (ethernet.connected) {

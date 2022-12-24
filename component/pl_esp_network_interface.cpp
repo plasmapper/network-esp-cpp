@@ -21,13 +21,8 @@ EspNetworkInterface::~EspNetworkInterface() {
 esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
   LockGuard lg (*this);
   ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
-  
-  esp_err_t error = esp_netif_dhcpc_start (netif);
-  if (error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED) {
-    ipV4DhcpClientEnabled = true;
-    return ESP_OK;
-  }
-  ESP_RETURN_ON_ERROR (error, TAG, "start failed");
+  ipV4DhcpClientEnabled = true;
+  esp_netif_dhcpc_start (netif);
   return ESP_OK;
 }
 
@@ -36,13 +31,8 @@ esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
 esp_err_t EspNetworkInterface::DisableIpV4DhcpClient() {
   LockGuard lg (*this);
   ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
-
-  esp_err_t error = esp_netif_dhcpc_stop (netif);
-  if (error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED) {
-    ipV4DhcpClientEnabled = false;
-    return ESP_OK;
-  }
-  ESP_RETURN_ON_ERROR (error, TAG, "stop failed");
+  ipV4DhcpClientEnabled = false;
+  esp_netif_dhcpc_stop (netif);
   return ESP_OK;
 }
 
@@ -63,21 +53,12 @@ esp_err_t EspNetworkInterface::DisableIpV6DhcpClient() {
 //==============================================================================
 
 bool EspNetworkInterface::IsIpV4DhcpClientEnabled() {
-  LockGuard lg (*this);
-  if (!netif)
-    return false;
-  if (IsConnected()) {
-    esp_netif_dhcp_status_t status;
-    return esp_netif_dhcpc_get_status (netif, &status) == ESP_OK ? (status == ESP_NETIF_DHCP_STARTED) : false;
-  }
-  else
-    return ipV4DhcpClientEnabled;
+  return ipV4DhcpClientEnabled;
 }
 
 //==============================================================================
 
 bool EspNetworkInterface::IsIpV6DhcpClientEnabled() {
-  LockGuard lg (*this);
   return false;  
 }
 
@@ -187,7 +168,6 @@ esp_err_t EspNetworkInterface::Initialize (esp_netif_t* netif) {
 
 void EspNetworkInterface::EventHandler (void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData) {
   EspNetworkInterface& espNetworkInterface = *(EspNetworkInterface*)arg;
-  LockGuard lg (espNetworkInterface);
 
   if (eventBase == IP_EVENT) {
     if (eventID == IP_EVENT_STA_GOT_IP || eventID == IP_EVENT_ETH_GOT_IP)

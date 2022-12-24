@@ -135,6 +135,7 @@ void EspEthernet::EventHandler (void* arg, esp_event_base_t eventBase, int32_t e
     if (eventID == ETHERNET_EVENT_CONNECTED) {
       ethernet.connected = true;
       esp_netif_create_ip6_linklocal (ethernet.netif);
+      ethernet.connectedEvent.Generate();
       
       if (ethernet.IsIpV4DhcpClientEnabled())
         esp_netif_dhcpc_start (ethernet.netif);

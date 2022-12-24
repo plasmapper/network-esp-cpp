@@ -171,6 +171,7 @@ void EspWiFiStation::EventHandler (void* arg, esp_event_base_t eventBase, int32_
     if (eventID == WIFI_EVENT_STA_CONNECTED) {
       wifiStation.connected = true;
       esp_netif_create_ip6_linklocal (wifiStation.netif);
+      wifiStation.connectedEvent.Generate();
       
       if (wifiStation.IsIpV4DhcpClientEnabled())
         esp_netif_dhcpc_start (wifiStation.netif);

@@ -41,7 +41,6 @@ esp_err_t NetworkStream::Read (void* dest, size_t size) {
   ESP_RETURN_ON_FALSE (sock >= 0, ESP_ERR_INVALID_STATE, TAG, "network stream is closed");
   if (!size)
     return ESP_OK;
-  bool flush = (size == SIZE_MAX);
  
   int res;
   if (dest) {
@@ -52,7 +51,7 @@ esp_err_t NetworkStream::Read (void* dest, size_t size) {
     for (; size && recv (sock, &data, 1, 0) == 1; size--);
   }
 
-  if (!size || (errno == EAGAIN && flush))
+  if (!size || (errno == EAGAIN && size == SIZE_MAX))
     return ESP_OK;
 
   ESP_RETURN_ON_FALSE (errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");

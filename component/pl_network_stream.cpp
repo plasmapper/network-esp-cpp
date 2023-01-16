@@ -51,7 +51,7 @@ esp_err_t NetworkStream::Read (void* dest, size_t size) {
     for (; size && recv (sock, &data, 1, 0) == 1; size--);
   }
 
-  if (!size || (errno == EAGAIN && size == SIZE_MAX))
+  if (!size)
     return ESP_OK;
 
   ESP_RETURN_ON_FALSE (errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");

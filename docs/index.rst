@@ -42,6 +42,7 @@ Examples
 | `Ethernet <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/ethernet>`_
 | `Wi-Fi station <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/wifi_station>`_
 | `TCP echo server <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/tcp_echo_server>`_
+| `TCP OTA server <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/tcp_ota_server>`_
   
 API reference
 -------------

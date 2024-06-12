@@ -3,7 +3,7 @@ Network Component
 
 .. |COMPONENT| replace:: network
 
-.. |VERSION| replace:: 1.0.0
+.. |VERSION| replace:: 1.0.1
 
 .. include:: ../../../installation.rst
 
@@ -41,10 +41,10 @@ Features
 
 Examples
 --------
-| `Ethernet <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/ethernet>`_
-| `Wi-Fi station <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/wifi_station>`_
-| `TCP echo server <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/tcp_echo_server>`_
-| `TCP OTA server <https://github.com/plasmapper/network-esp-cpp/tree/main/examples/tcp_ota_server>`_
+| `Ethernet <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.1/examples/ethernet>`_
+| `Wi-Fi station <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.1/examples/wifi_station>`_
+| `TCP echo server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.1/examples/tcp_echo_server>`_
+| `TCP OTA server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.1/examples/tcp_ota_server>`_
   
 API reference
 -------------

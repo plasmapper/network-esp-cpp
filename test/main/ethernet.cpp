@@ -1,6 +1,8 @@
 #include "ethernet.h"
 #include "unity.h"
 
+#if CONFIG_ETH_USE_ESP32_EMAC
+
 //==============================================================================
 
 const PL::IpV4Address staticIpV4Address (192, 168, 0, 10);
@@ -45,3 +47,5 @@ void TestEthernet() {
   TEST_ASSERT (!ethernet.IsEnabled());
   TEST_ASSERT (!ethernet.IsConnected());
 }
+
+#endif

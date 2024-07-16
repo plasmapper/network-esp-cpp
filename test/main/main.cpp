@@ -15,7 +15,9 @@ extern "C" void app_main(void) {
   UNITY_BEGIN();
   RUN_TEST (TestIpAddress);
   RUN_TEST (TestTcp);
+  #if CONFIG_ETH_USE_ESP32_EMAC
   RUN_TEST (TestEthernet);
+  #endif
   RUN_TEST (TestWiFi);
   UNITY_END();
 }

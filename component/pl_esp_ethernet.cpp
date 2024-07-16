@@ -2,6 +2,8 @@
 #include "esp_check.h"
 #include "esp_event.h"
 
+#if CONFIG_ETH_USE_ESP32_EMAC
+
 //==============================================================================
 
 static const char* TAG = "pl_esp_ethernet";
@@ -154,3 +156,5 @@ void EspEthernet::EventHandler (void* arg, esp_event_base_t eventBase, int32_t e
 //==============================================================================
 
 }
+
+#endif

@@ -1,6 +1,9 @@
 #pragma once
 #include "pl_ethernet.h"
 #include "pl_esp_network_interface.h"
+
+#if CONFIG_ETH_USE_ESP32_EMAC
+
 #include "esp_eth.h"
 
 //==============================================================================
@@ -57,3 +60,5 @@ private:
 //==============================================================================
 
 }
+
+#endif

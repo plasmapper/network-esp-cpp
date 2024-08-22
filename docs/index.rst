@@ -3,6 +3,8 @@ Network Component
 
 .. |COMPONENT| replace:: network
 
+.. |ESP_IDF_VERSION| replace:: 5.0
+
 .. |VERSION| replace:: 1.0.2
 
 .. include:: ../../../installation.rst

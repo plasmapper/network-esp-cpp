@@ -62,7 +62,7 @@ public:
   /// @brief Set IPv4 address
   /// @param address IPv4 address
   /// @return error code
-  virtual esp_err_t SetIpV4Address (IpV4Address address) = 0;
+  virtual esp_err_t SetIpV4Address(IpV4Address address) = 0;
 
   /// @brief Get IPv4 netmask
   /// @return IPv4 netmask
@@ -71,7 +71,7 @@ public:
   /// @brief Set IPv4 netmask
   /// @param netmask IPv4 netmask
   /// @return error code
-  virtual esp_err_t SetIpV4Netmask (IpV4Address netmask) = 0;
+  virtual esp_err_t SetIpV4Netmask(IpV4Address netmask) = 0;
 
   /// @brief Get IPv4 gateway
   /// @return IPv4 gateway
@@ -80,7 +80,7 @@ public:
   /// @brief Set IPv4 gateway
   /// @param gateway IPv4 gateway
   /// @return error code
-  virtual esp_err_t SetIpV4Gateway (IpV4Address gateway) = 0;
+  virtual esp_err_t SetIpV4Gateway(IpV4Address gateway) = 0;
 
   /// @brief Get IPv6 link local address
   /// @return IPv6 link local address
@@ -93,7 +93,7 @@ public:
   /// @brief Set IPv6 global address
   /// @param address IPv6 global address
   /// @return error code
-  virtual esp_err_t SetIpV6GlobalAddress (IpV6Address address) = 0;
+  virtual esp_err_t SetIpV6GlobalAddress(IpV6Address address) = 0;
 };
   
 //==============================================================================

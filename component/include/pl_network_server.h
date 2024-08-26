@@ -20,7 +20,7 @@ public:
   /// @brief Set listening port
   /// @param port port
   /// @return error code
-  virtual esp_err_t SetPort (uint16_t port) = 0;
+  virtual esp_err_t SetPort(uint16_t port) = 0;
 
   /// @brief Get the maximum number of server clients
   /// @return number of clients
@@ -29,7 +29,7 @@ public:
   /// @brief Set the maximum number of server clients
   /// @param maxNumberOfClients number of clients
   /// @return error code
-  virtual esp_err_t SetMaxNumberOfClients (size_t maxNumberOfClients) = 0;
+  virtual esp_err_t SetMaxNumberOfClients(size_t maxNumberOfClients) = 0;
 };
   
 //==============================================================================

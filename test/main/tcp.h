@@ -7,10 +7,10 @@ public:
   using PL::TcpServer::TcpServer;
 
 protected:
-  esp_err_t HandleRequest (PL::NetworkStream& clientStream) override;
+  esp_err_t HandleRequest(PL::NetworkStream& clientStream) override;
 };
 
 //==============================================================================
 
 void TestTcp();
-bool CompareEndpoints (const PL::NetworkEndpoint& ep1, const PL::NetworkEndpoint& ep2);
+bool CompareEndpoints(const PL::NetworkEndpoint& ep1, const PL::NetworkEndpoint& ep2);

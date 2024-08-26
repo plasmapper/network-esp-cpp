@@ -27,12 +27,12 @@ public:
   /// @param resetPin reset pin
   /// @param mdcPin MDC pin
   /// @param mdioPin MDIO pin
-  EspEthernet (PhyNewFunction phyNewFunction, int32_t phyAddress, int resetPin, int mdcPin, int mdioPin);
+  EspEthernet(PhyNewFunction phyNewFunction, int32_t phyAddress, int resetPin, int mdcPin, int mdioPin);
   ~EspEthernet();
-  EspEthernet (const EspEthernet&) = delete;
-  EspEthernet& operator= (const EspEthernet&) = delete;
+  EspEthernet(const EspEthernet&) = delete;
+  EspEthernet& operator=(const EspEthernet&) = delete;
 
-  esp_err_t Lock (TickType_t timeout = portMAX_DELAY) override;
+  esp_err_t Lock(TickType_t timeout = portMAX_DELAY) override;
   esp_err_t Unlock() override;
 
   esp_err_t Initialize() override;
@@ -54,7 +54,7 @@ private:
   esp_eth_handle_t handle = NULL;
   esp_eth_netif_glue_handle_t netifGlueHandle = NULL;
 
-  static void EventHandler (void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData);
+  static void EventHandler(void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData);
 };
 
 //==============================================================================

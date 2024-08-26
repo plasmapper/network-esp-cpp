@@ -18,81 +18,81 @@ const std::string EspEthernet::defaultName = "Ethernet";
 
 //==============================================================================
 
-EspEthernet::EspEthernet (PhyNewFunction phyNewFunction, int32_t phyAddress, int resetPin, int mdcPin, int mdioPin) : phyNewFunction (phyNewFunction) {
+EspEthernet::EspEthernet(PhyNewFunction phyNewFunction, int32_t phyAddress, int resetPin, int mdcPin, int mdioPin) : phyNewFunction(phyNewFunction) {
   phyConfig.phy_addr = phyAddress;
   phyConfig.reset_gpio_num = resetPin;
-  esp32EmacConfig.smi_mdc_gpio_num = mdcPin;
-  esp32EmacConfig.smi_mdio_gpio_num = mdioPin;
+  esp32EmacConfig.smi_gpio.mdc_num = mdcPin;
+  esp32EmacConfig.smi_gpio.mdio_num = mdioPin;
 
-  SetName (defaultName);
+  SetName(defaultName);
 }
 
 //==============================================================================
 
 EspEthernet::~EspEthernet() {
-  esp_event_handler_unregister (ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+  esp_event_handler_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler);
 
   if (netifGlueHandle)
-    esp_eth_del_netif_glue (netifGlueHandle);
+    esp_eth_del_netif_glue(netifGlueHandle);
 
   if (netif)
-    esp_netif_destroy (netif);
+    esp_netif_destroy(netif);
 
   if (handle) {
-    esp_eth_stop (handle);
-    esp_eth_driver_uninstall (handle);
+    esp_eth_stop(handle);
+    esp_eth_driver_uninstall(handle);
   }
 }
 
 //==============================================================================
 
-esp_err_t EspEthernet::Lock (TickType_t timeout) {
-  esp_err_t error = mutex.Lock (timeout);
+esp_err_t EspEthernet::Lock(TickType_t timeout) {
+  esp_err_t error = mutex.Lock(timeout);
   if (error == ESP_OK)
     return ESP_OK;
   if (error == ESP_ERR_TIMEOUT && timeout == 0)
     return ESP_ERR_TIMEOUT;
-  ESP_RETURN_ON_ERROR (error, TAG, "mutex lock failed");
+  ESP_RETURN_ON_ERROR(error, TAG, "mutex lock failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspEthernet::Unlock() {
-  ESP_RETURN_ON_ERROR (mutex.Unlock(), TAG, "mutex unlock failed");
+  ESP_RETURN_ON_ERROR(mutex.Unlock(), TAG, "mutex unlock failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspEthernet::Initialize() {
-  LockGuard lg (*this);
+  LockGuard lg(*this);
   if (netif)
     return ESP_OK;
 
-  esp_eth_phy_t* phy = phyNewFunction (&phyConfig);
-  esp_eth_mac_t* mac = esp_eth_mac_new_esp32 (&esp32EmacConfig, &macConfig);
-  esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG (mac, phy);
-  ESP_RETURN_ON_ERROR (esp_eth_driver_install (&ethernetConfig, &handle), TAG, "driver install failed");
+  esp_eth_phy_t* phy = phyNewFunction(&phyConfig);
+  esp_eth_mac_t* mac = esp_eth_mac_new_esp32(&esp32EmacConfig, &macConfig);
+  esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG(mac, phy);
+  ESP_RETURN_ON_ERROR(esp_eth_driver_install(&ethernetConfig, &handle), TAG, "driver install failed");
   esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();
-  netif = esp_netif_new (&netifConfig);
-  netifGlueHandle = esp_eth_new_netif_glue (handle);
-  ESP_RETURN_ON_ERROR (esp_netif_attach (netif, netifGlueHandle), TAG, "netif attach failed");
+  netif = esp_netif_new(&netifConfig);
+  netifGlueHandle = esp_eth_new_netif_glue(handle);
+  ESP_RETURN_ON_ERROR(esp_netif_attach(netif, netifGlueHandle), TAG, "netif attach failed");
 
-  ESP_RETURN_ON_ERROR (esp_event_handler_instance_register (ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
-  ESP_RETURN_ON_ERROR (EspNetworkInterface::Initialize (netif), TAG, "initialize failed");
+  ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
+  ESP_RETURN_ON_ERROR(EspNetworkInterface::Initialize(netif), TAG, "initialize failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t EspEthernet::Enable() {
-  LockGuard lg (*this);
-  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  LockGuard lg(*this);
+  ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
   if (enabled)
     return ESP_OK;
 
-  ESP_RETURN_ON_ERROR (esp_eth_start (handle), TAG, "start failed");
+  ESP_RETURN_ON_ERROR(esp_eth_start(handle), TAG, "start failed");
   enabled = true;
   enabledEvent.Generate();
 
@@ -102,12 +102,12 @@ esp_err_t EspEthernet::Enable() {
 //==============================================================================
 
 esp_err_t EspEthernet::Disable() {
-  LockGuard lg (*this);
-  ESP_RETURN_ON_FALSE (netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
+  LockGuard lg(*this);
+  ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_STATE, TAG, "ethernet is not initialized");
   if (!enabled)
     return ESP_OK;
 
-  ESP_RETURN_ON_ERROR (esp_eth_stop (handle), TAG, "stop failed");
+  ESP_RETURN_ON_ERROR(esp_eth_stop(handle), TAG, "stop failed");
   enabled = false;
   disabledEvent.Generate();
 
@@ -117,32 +117,32 @@ esp_err_t EspEthernet::Disable() {
 //==============================================================================
 
 bool EspEthernet::IsEnabled() {
-  LockGuard lg (*this);
+  LockGuard lg(*this);
   return enabled;
 }
 
 //==============================================================================
 
 bool EspEthernet::IsConnected() {
-  LockGuard lg (*this);
+  LockGuard lg(*this);
   return enabled && connected;
 }
 
 //==============================================================================
 
-void EspEthernet::EventHandler (void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData) {
+void EspEthernet::EventHandler(void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData) {
   EspEthernet& ethernet = *(EspEthernet*)arg;
 
   if (eventBase == ETH_EVENT) {
     if (eventID == ETHERNET_EVENT_CONNECTED) {
       ethernet.connected = true;
-      esp_netif_create_ip6_linklocal (ethernet.netif);
+      esp_netif_create_ip6_linklocal(ethernet.netif);
       ethernet.connectedEvent.Generate();
       
       if (ethernet.IsIpV4DhcpClientEnabled())
-        esp_netif_dhcpc_start (ethernet.netif);
+        esp_netif_dhcpc_start(ethernet.netif);
       else
-        esp_netif_dhcpc_stop (ethernet.netif);
+        esp_netif_dhcpc_stop(ethernet.netif);
     }
     if (eventID == ETHERNET_EVENT_DISCONNECTED) {
       if (ethernet.connected) {

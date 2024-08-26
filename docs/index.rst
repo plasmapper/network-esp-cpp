@@ -3,9 +3,9 @@ Network Component
 
 .. |COMPONENT| replace:: network
 
-.. |ESP_IDF_VERSION| replace:: 5.0
+.. |ESP_IDF_VERSION| replace:: 5.3
 
-.. |VERSION| replace:: 1.0.2
+.. |VERSION| replace:: 1.1.0
 
 .. include:: ../../../installation.rst
 
@@ -41,12 +41,19 @@ Features
     :cpp:func:`PL::TcpServer::HandleRequest` to handle the client request. :cpp:func:`PL::TcpServer::HandleRequest` is only called for clients
     with the incoming data in the internal buffer.
 
+Thread safety
+-------------
+
+Class method thread safety is implemented by having the :cpp:class:`PL::Lockable` as a base class and creating the class object lock guard at the beginning of the methods.
+
+:cpp:class:`PL::TcpServer` task method locks both the :cpp:class:`PL::TcpServer` and the client :cpp:class:`PL::NetworkStream` objects for the duration of the transaction.
+
 Examples
 --------
-| `Ethernet <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.2/examples/ethernet>`_
-| `Wi-Fi station <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.2/examples/wifi_station>`_
-| `TCP echo server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.2/examples/tcp_echo_server>`_
-| `TCP OTA server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.0.2/examples/tcp_ota_server>`_
+| `Ethernet <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/ethernet>`_
+| `Wi-Fi station <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/wifi_station>`_
+| `TCP echo server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/tcp_echo_server>`_
+| `TCP OTA server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/tcp_ota_server>`_
   
 API reference
 -------------

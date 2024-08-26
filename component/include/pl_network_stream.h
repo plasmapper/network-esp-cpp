@@ -20,15 +20,15 @@ public:
 
   /// @brief Create an open network stream
   /// @param sock stream socket
-  NetworkStream (int sock);
+  NetworkStream(int sock);
 
-  esp_err_t Lock (TickType_t timeout = portMAX_DELAY) override;
+  esp_err_t Lock(TickType_t timeout = portMAX_DELAY) override;
   esp_err_t Unlock() override;
 
   using Stream::Read;
-  esp_err_t Read (void* dest, size_t size) override;
+  esp_err_t Read(void* dest, size_t size) override;
   using Stream::Write;
-  esp_err_t Write (const void* src, size_t size) override;
+  esp_err_t Write(const void* src, size_t size) override;
 
   /// @brief Close the stream
   /// @return error code
@@ -57,7 +57,7 @@ public:
   size_t GetReadableSize() override;
 
   TickType_t GetReadTimeout() override;
-  esp_err_t SetReadTimeout (TickType_t timeout) override;
+  esp_err_t SetReadTimeout(TickType_t timeout) override;
 
   /// @brief Get the local endpoint of the stream 
   /// @return local endpoint
@@ -70,25 +70,25 @@ public:
   /// @brief Set the idle time before the keep-alive packets are sent
   /// @param seconds time in seconds
   /// @return error code
-  esp_err_t SetKeepAliveIdleTime (int seconds);
+  esp_err_t SetKeepAliveIdleTime(int seconds);
 
   /// @brief Set the keep-alive packet interval
   /// @param seconds interval in seconds
   /// @return error code
-  esp_err_t SetKeepAliveInterval (int seconds);
+  esp_err_t SetKeepAliveInterval(int seconds);
 
   /// @brief Set the number of the keep-alive packets
   /// @param count number of packets
   /// @return error code
-  esp_err_t SetKeepAliveCount (int count);
+  esp_err_t SetKeepAliveCount(int count);
 
 private:
   Mutex mutex;
   int sock = -1;
   TickType_t readTimeout = defaultReadTimeout;
 
-  NetworkEndpoint SockAddrToEndpoint (sockaddr_storage& sockAddr);
-  esp_err_t SetSocketOption (int level, int option, int value);
+  NetworkEndpoint SockAddrToEndpoint(sockaddr_storage& sockAddr);
+  esp_err_t SetSocketOption(int level, int option, int value);
 };
   
 //==============================================================================

@@ -35,16 +35,16 @@ struct IpV4Address {
   IpV4Address();
 
   /// @brief Create an IPv4 address from bytes in network byte order
-  IpV4Address (uint8_t u8_0, uint8_t u8_1, uint8_t u8_2, uint8_t u8_3);
+  IpV4Address(uint8_t u8_0, uint8_t u8_1, uint8_t u8_2, uint8_t u8_3);
 
   /// @brief Create an IPv4 address from words in network byte order
-  IpV4Address (uint16_t u16_0, uint16_t u16_1);
+  IpV4Address(uint16_t u16_0, uint16_t u16_1);
 
   /// @brief Create an IPv4 address from dword in network byte order
-  IpV4Address (uint32_t u32);
+  IpV4Address(uint32_t u32);
 
   /// @brief Create an IPv4 address from string
-  IpV4Address (const std::string& address);
+  IpV4Address(const std::string& address);
 
   /// @brief Convert address to string
   /// @return address as string
@@ -70,17 +70,17 @@ struct IpV6Address {
   IpV6Address();
 
   /// @brief Create an IPv6 address from bytes in network byte order
-  IpV6Address (uint8_t u8_0, uint8_t u8_1, uint8_t u8_2, uint8_t u8_3, uint8_t u8_4, uint8_t u8_5, uint8_t u8_6, uint8_t u8_7,
+  IpV6Address(uint8_t u8_0, uint8_t u8_1, uint8_t u8_2, uint8_t u8_3, uint8_t u8_4, uint8_t u8_5, uint8_t u8_6, uint8_t u8_7,
                uint8_t u8_8, uint8_t u8_9, uint8_t u8_10, uint8_t u8_11, uint8_t u8_12, uint8_t u8_13, uint8_t u8_14, uint8_t u8_15, uint8_t zoneId = 0);
 
   /// @brief Create an IPv6 address from words in network byte order
-  IpV6Address (uint16_t u16_0, uint16_t u16_1, uint16_t u16_2, uint16_t u16_3, uint16_t u16_4, uint16_t u16_5, uint16_t u16_6, uint16_t u16_7, uint8_t zoneId = 0);
+  IpV6Address(uint16_t u16_0, uint16_t u16_1, uint16_t u16_2, uint16_t u16_3, uint16_t u16_4, uint16_t u16_5, uint16_t u16_6, uint16_t u16_7, uint8_t zoneId = 0);
 
   /// @brief Create an IPv6 address from dwords in network byte order
-  IpV6Address (uint32_t u32_0, uint32_t u32_1, uint32_t u32_2, uint32_t u32_3, uint8_t zoneId = 0);
+  IpV6Address(uint32_t u32_0, uint32_t u32_1, uint32_t u32_2, uint32_t u32_3, uint8_t zoneId = 0);
 
   /// @brief Create an IPv6 address from string
-  IpV6Address (const std::string& address);
+  IpV6Address(const std::string& address);
 
   /// @brief Convert address to string
   /// @return address as string
@@ -104,9 +104,9 @@ struct NetworkAddress {
   /// @brief Create a zero network address
   NetworkAddress();
   /// @brief Create an IPv4 address
-  NetworkAddress (IpV4Address address);
+  NetworkAddress(IpV4Address address);
   /// @brief Create an IPv6 address
-  NetworkAddress (IpV6Address address);
+  NetworkAddress(IpV6Address address);
   
   /// @brief Convert address to string
   /// @return address as string
@@ -125,9 +125,9 @@ struct NetworkEndpoint {
   /// @brief Create zero network endpoint
   NetworkEndpoint();
   /// @brief Create an IPv4 network endpoint
-  NetworkEndpoint (IpV4Address address, uint16_t port);
+  NetworkEndpoint(IpV4Address address, uint16_t port);
   /// @brief Create an IPv6 network endpoint
-  NetworkEndpoint (IpV6Address address, uint16_t port);
+  NetworkEndpoint(IpV6Address address, uint16_t port);
 };
 
 //==============================================================================

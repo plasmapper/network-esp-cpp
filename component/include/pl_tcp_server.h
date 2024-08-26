@@ -29,12 +29,12 @@ public:
 
   /// @brief Create a TCP server
   /// @param port port
-  TcpServer (uint16_t port);
+  TcpServer(uint16_t port);
   ~TcpServer();
-  TcpServer (const TcpServer&) = delete;
-  TcpServer& operator= (const TcpServer&) = delete;
+  TcpServer(const TcpServer&) = delete;
+  TcpServer& operator=(const TcpServer&) = delete;
 
-  esp_err_t Lock (TickType_t timeout = portMAX_DELAY) override;
+  esp_err_t Lock(TickType_t timeout = portMAX_DELAY) override;
   esp_err_t Unlock() override;
 
   esp_err_t Enable() override;
@@ -59,10 +59,10 @@ public:
   bool IsEnabled() override;
 
   uint16_t GetPort() override;
-  esp_err_t SetPort (uint16_t port) override;
+  esp_err_t SetPort(uint16_t port) override;
 
   size_t GetMaxNumberOfClients() override;
-  esp_err_t SetMaxNumberOfClients (size_t maxNumberOfClients) override;
+  esp_err_t SetMaxNumberOfClients(size_t maxNumberOfClients) override;
 
   /// @brief Get the connected client streams
   /// @return client streams
@@ -71,28 +71,28 @@ public:
   /// @brief Set the server task parameters
   /// @param taskParameters task parameters
   /// @return error code
-  esp_err_t SetTaskParameters (const TaskParameters& taskParameters);
+  esp_err_t SetTaskParameters(const TaskParameters& taskParameters);
 
   /// @brief Set the idle time before the keep-alive packets are sent
   /// @param seconds time in seconds
   /// @return error code
-  esp_err_t SetKeepAliveIdleTime (int seconds);
+  esp_err_t SetKeepAliveIdleTime(int seconds);
 
   /// @brief Set the keep-alive packet interval
   /// @param seconds interval in seconds
   /// @return error code
-  esp_err_t SetKeepAliveInterval (int seconds);
+  esp_err_t SetKeepAliveInterval(int seconds);
 
   /// @brief Set the number of the keep-alive packets
   /// @param count number of packets
   /// @return error code
-  esp_err_t SetKeepAliveCount (int count);
+  esp_err_t SetKeepAliveCount(int count);
 
 protected:
   /// @brief Handle the TCP client request
   /// @param clientStream client stream
   /// @return error code
-  virtual esp_err_t HandleRequest (NetworkStream& clientStream) = 0;
+  virtual esp_err_t HandleRequest(NetworkStream& clientStream) = 0;
 
 private:
   Mutex mutex;
@@ -111,7 +111,7 @@ private:
   bool enableFromRequest = false;
 
   esp_err_t SetStreamSocketOptions();
-  static void TaskCode (void* parameters);
+  static void TaskCode(void* parameters);
 
   int Listen();
   esp_err_t RestartIfEnabled(); 

@@ -13,17 +13,17 @@ public:
   /// @brief Create an IPv4 TCP client
   /// @param address IPv4 addres
   /// @param port port
-  TcpClient (IpV4Address address, uint16_t port);
+  TcpClient(IpV4Address address, uint16_t port);
 
   /// @brief Create an IPv6 TCP client
   /// @param address IPv6 addres
   /// @param port port
-  TcpClient (IpV6Address address, uint16_t port);
-  ~TcpClient ();
-  TcpClient (const TcpClient&) = delete;
-  TcpClient& operator= (const TcpClient&) = delete;
+  TcpClient(IpV6Address address, uint16_t port);
+  ~TcpClient();
+  TcpClient(const TcpClient&) = delete;
+  TcpClient& operator=(const TcpClient&) = delete;
 
-  esp_err_t Lock (TickType_t timeout = portMAX_DELAY) override;
+  esp_err_t Lock(TickType_t timeout = portMAX_DELAY) override;
   esp_err_t Unlock() override;
 
   /// @brief Connect to the server if not already connected
@@ -53,7 +53,7 @@ public:
   /// @brief Set the read operation timeout 
   /// @param timeout timeout in FreeRTOS ticks
   /// @return error code
-  esp_err_t SetReadTimeout (TickType_t timeout);
+  esp_err_t SetReadTimeout(TickType_t timeout);
 
   /// @brief Get the local endpoint of the client
   /// @return local endpoint
@@ -67,13 +67,13 @@ public:
   /// @param address IPv4 address
   /// @param port port
   /// @return error code
-  esp_err_t SetRemoteEndpoint (IpV4Address address, uint16_t port);
+  esp_err_t SetRemoteEndpoint(IpV4Address address, uint16_t port);
 
   /// @brief Set the IPv6 remote endpoint of the client
   /// @param address IPv6 address
   /// @param port port
   /// @return error code
-  esp_err_t SetRemoteEndpoint (IpV6Address address, uint16_t port);
+  esp_err_t SetRemoteEndpoint(IpV6Address address, uint16_t port);
 
   /// @brief Get the client stream
   /// @return stream

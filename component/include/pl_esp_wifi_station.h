@@ -18,10 +18,10 @@ public:
   /// @brief Create an ESP Wi-Fi station
   EspWiFiStation();
   ~EspWiFiStation();
-  EspWiFiStation (const EspWiFiStation&) = delete;
-  EspWiFiStation& operator= (const EspWiFiStation&) = delete;
+  EspWiFiStation(const EspWiFiStation&) = delete;
+  EspWiFiStation& operator=(const EspWiFiStation&) = delete;
 
-  esp_err_t Lock (TickType_t timeout = portMAX_DELAY) override;
+  esp_err_t Lock(TickType_t timeout = portMAX_DELAY) override;
   esp_err_t Unlock() override;
 
   esp_err_t Initialize() override;
@@ -33,10 +33,10 @@ public:
   bool IsConnected() override;
   
   std::string GetSsid() override;
-  esp_err_t SetSsid (const std::string& ssid) override;
+  esp_err_t SetSsid(const std::string& ssid) override;
 
   std::string GetPassword() override;
-  esp_err_t SetPassword (const std::string& password) override;
+  esp_err_t SetPassword(const std::string& password) override;
 
 private:
   Mutex mutex;
@@ -44,7 +44,7 @@ private:
   bool enabled = false, connected = false;
   std::string ssid, password;
 
-  static void EventHandler (void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData);
+  static void EventHandler(void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData);
 };
 
 //==============================================================================

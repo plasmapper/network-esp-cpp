@@ -20,7 +20,7 @@ public:
   /// @brief Set station SSID
   /// @param ssid station SSID
   /// @return error code
-  virtual esp_err_t SetSsid (const std::string& ssid) = 0;
+  virtual esp_err_t SetSsid(const std::string& ssid) = 0;
 
   /// @brief Get station password
   /// @return station password
@@ -29,7 +29,7 @@ public:
   /// @brief Set station password
   /// @param password station password
   /// @return error code
-  virtual esp_err_t SetPassword (const std::string& password) = 0;
+  virtual esp_err_t SetPassword(const std::string& password) = 0;
 };
 
 //==============================================================================

@@ -15,7 +15,7 @@ public:
   /// @brief Default hardware interface name
   static const std::string defaultName;
 
-  /// @brief Create an ESP Wi-Fi station
+  /// @brief Creates an ESP Wi-Fi station
   EspWiFiStation();
   ~EspWiFiStation();
   EspWiFiStation(const EspWiFiStation&) = delete;

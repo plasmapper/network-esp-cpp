@@ -15,10 +15,10 @@ public:
   /// @brief Default read operation timeout in FreeRTOS ticks
   static const TickType_t defaultReadTimeout = 300 / portTICK_PERIOD_MS;
 
-  /// @brief Create a closed network stream
+  /// @brief Creates a closed network stream
   NetworkStream() {}
 
-  /// @brief Create an open network stream
+  /// @brief Creates an open network stream
   /// @param sock stream socket
   NetworkStream(int sock);
 
@@ -30,27 +30,27 @@ public:
   using Stream::Write;
   esp_err_t Write(const void* src, size_t size) override;
 
-  /// @brief Close the stream
+  /// @brief Closes the stream
   /// @return error code
   esp_err_t Close();
 
-  /// @brief Enable the Nagle's algorithm
+  /// @brief Enables the Nagle's algorithm
   /// @return error code
   esp_err_t EnableNagleAlgorithm();
 
-  /// @brief Disable the Nagle's algorithm
+  /// @brief Disables the Nagle's algorithm
   /// @return error code
   esp_err_t DisableNagleAlgorithm();
   
-  /// @brief Enable the keep-alive packets
+  /// @brief Enables the keep-alive packets
   /// @return error code
   esp_err_t EnableKeepAlive();
   
-  /// @brief Disable the keep-alive packets
+  /// @brief Disables the keep-alive packets
   /// @return error code
   esp_err_t DisableKeepAlive();
 
-  /// @brief Check if the stream is open
+  /// @brief Checks if the stream is open
   /// @return true if the stream is open
   bool IsOpen();
 
@@ -59,25 +59,25 @@ public:
   TickType_t GetReadTimeout() override;
   esp_err_t SetReadTimeout(TickType_t timeout) override;
 
-  /// @brief Get the local endpoint of the stream 
+  /// @brief Gets the local endpoint of the stream 
   /// @return local endpoint
   NetworkEndpoint GetLocalEndpoint();
 
-  /// @brief Get the remote endpoint of the stream 
+  /// @brief Gets the remote endpoint of the stream 
   /// @return remote endpoint
   NetworkEndpoint GetRemoteEndpoint();
 
-  /// @brief Set the idle time before the keep-alive packets are sent
+  /// @brief Sets the idle time before the keep-alive packets are sent
   /// @param seconds time in seconds
   /// @return error code
   esp_err_t SetKeepAliveIdleTime(int seconds);
 
-  /// @brief Set the keep-alive packet interval
+  /// @brief Sets the keep-alive packet interval
   /// @param seconds interval in seconds
   /// @return error code
   esp_err_t SetKeepAliveInterval(int seconds);
 
-  /// @brief Set the number of the keep-alive packets
+  /// @brief Sets the number of the keep-alive packets
   /// @param count number of packets
   /// @return error code
   esp_err_t SetKeepAliveCount(int count);

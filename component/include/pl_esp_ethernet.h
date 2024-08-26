@@ -21,7 +21,7 @@ public:
   /// @brief Default hardware interface name
   static const std::string defaultName;
 
-  /// @brief Create an ESP Ethernet interface
+  /// @brief Creates an ESP Ethernet interface
   /// @param phyNewFunction PHY generator function
   /// @param phyAddress PHY address
   /// @param resetPin reset pin

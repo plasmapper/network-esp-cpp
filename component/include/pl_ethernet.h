@@ -10,7 +10,7 @@ namespace PL {
 /// @brief Ethernet interface class
 class Ethernet : public virtual NetworkInterface {
 public:
-  /// @brief Create an Ethernet interface
+  /// @brief Creates an Ethernet interface
   Ethernet() {}
 };
 

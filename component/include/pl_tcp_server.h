@@ -27,7 +27,7 @@ public:
   /// @brief Client disconnected event
   Event<TcpServer, NetworkStream&> clientDisconnectedEvent;
 
-  /// @brief Create a TCP server
+  /// @brief Creates a TCP server
   /// @param port port
   TcpServer(uint16_t port);
   ~TcpServer();
@@ -40,19 +40,19 @@ public:
   esp_err_t Enable() override;
   esp_err_t Disable() override;
 
-  /// @brief Enable the Nagle's algorithm
+  /// @brief Enables the Nagle's algorithm
   /// @return error code
   esp_err_t EnableNagleAlgorithm();
   
-  /// @brief Disable the Nagle's algorithm
+  /// @brief Disables the Nagle's algorithm
   /// @return error code
   esp_err_t DisableNagleAlgorithm();
 
-  /// @brief Enable the keep-alive packets
+  /// @brief Enables the keep-alive packets
   /// @return error code
   esp_err_t EnableKeepAlive();
   
-  /// @brief Disable the keep-alive packets
+  /// @brief Disables the keep-alive packets
   /// @return error code
   esp_err_t DisableKeepAlive();
 
@@ -64,32 +64,32 @@ public:
   size_t GetMaxNumberOfClients() override;
   esp_err_t SetMaxNumberOfClients(size_t maxNumberOfClients) override;
 
-  /// @brief Get the connected client streams
+  /// @brief Gets the connected client streams
   /// @return client streams
   std::vector<std::shared_ptr<NetworkStream>> GetClientStreams();
 
-  /// @brief Set the server task parameters
+  /// @brief Sets the server task parameters
   /// @param taskParameters task parameters
   /// @return error code
   esp_err_t SetTaskParameters(const TaskParameters& taskParameters);
 
-  /// @brief Set the idle time before the keep-alive packets are sent
+  /// @brief Sets the idle time before the keep-alive packets are sent
   /// @param seconds time in seconds
   /// @return error code
   esp_err_t SetKeepAliveIdleTime(int seconds);
 
-  /// @brief Set the keep-alive packet interval
+  /// @brief Sets the keep-alive packet interval
   /// @param seconds interval in seconds
   /// @return error code
   esp_err_t SetKeepAliveInterval(int seconds);
 
-  /// @brief Set the number of the keep-alive packets
+  /// @brief Sets the number of the keep-alive packets
   /// @param count number of packets
   /// @return error code
   esp_err_t SetKeepAliveCount(int count);
 
 protected:
-  /// @brief Handle the TCP client request
+  /// @brief Handles the TCP client request
   /// @param clientStream client stream
   /// @return error code
   virtual esp_err_t HandleRequest(NetworkStream& clientStream) = 0;

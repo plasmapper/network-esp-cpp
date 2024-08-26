@@ -35,10 +35,10 @@ public:
   esp_err_t SetIpV6GlobalAddress(IpV6Address address) override;
 
 protected:
-  /// @brief Create an internal ESP network interface
+  /// @brief Creates an internal ESP network interface
   EspNetworkInterface() {}
 
-  /// @brief Initialize the interface
+  /// @brief Initializes the interface
   /// @param netif ESP netif
   /// @return error code
   esp_err_t Initialize(esp_netif_t* netif);

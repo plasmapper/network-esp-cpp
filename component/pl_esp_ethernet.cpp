@@ -80,7 +80,7 @@ esp_err_t EspEthernet::Initialize() {
   ESP_RETURN_ON_ERROR(esp_netif_attach(netif, netifGlueHandle), TAG, "netif attach failed");
 
   ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
-  ESP_RETURN_ON_ERROR(EspNetworkInterface::Initialize(netif), TAG, "initialize failed");
+  ESP_RETURN_ON_ERROR(InitializeNetif(netif), TAG, "initialize failed");
   return ESP_OK;
 }
 

@@ -5,7 +5,7 @@ Network Component
 
 .. |ESP_IDF_VERSION| replace:: 5.3
 
-.. |VERSION| replace:: 1.1.0
+.. |VERSION| replace:: 1.1.1
 
 .. include:: ../../../installation.rst
 
@@ -50,10 +50,10 @@ Class method thread safety is implemented by having the :cpp:class:`PL::Lockable
 
 Examples
 --------
-| `Ethernet <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/ethernet>`_
-| `Wi-Fi station <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/wifi_station>`_
-| `TCP echo server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/tcp_echo_server>`_
-| `TCP OTA server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.0/examples/tcp_ota_server>`_
+| `Ethernet <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.1/examples/ethernet>`_
+| `Wi-Fi station <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.1/examples/wifi_station>`_
+| `TCP echo server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.1/examples/tcp_echo_server>`_
+| `TCP OTA server <https://components.espressif.com/components/plasmapper/pl_network/versions/1.1.1/examples/tcp_ota_server>`_
   
 API reference
 -------------

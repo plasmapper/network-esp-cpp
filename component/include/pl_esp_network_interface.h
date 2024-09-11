@@ -41,7 +41,7 @@ protected:
   /// @brief Initializes the interface
   /// @param netif ESP netif
   /// @return error code
-  esp_err_t Initialize(esp_netif_t* netif);
+  esp_err_t InitializeNetif(esp_netif_t* netif);
 
 private:
   esp_netif_t* netif = NULL;

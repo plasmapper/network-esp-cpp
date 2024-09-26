@@ -49,6 +49,9 @@ struct IpV4Address {
   /// @brief Converts address to string
   /// @return address as string
   std::string ToString() const;
+
+  bool operator==(const IpV4Address& address);
+  bool operator!=(const IpV4Address& address);
 };
 
 //==============================================================================
@@ -85,6 +88,9 @@ struct IpV6Address {
   /// @brief Converts address to string
   /// @return address as string
   std::string ToString() const;
+
+  bool operator==(const IpV6Address& address);
+  bool operator!=(const IpV6Address& address);
 };
 
 //==============================================================================

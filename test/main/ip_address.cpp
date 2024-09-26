@@ -13,7 +13,14 @@ std::string testIpV6AddressString = "0001:0203:0405:0607:0809:0A0B:0C0D:0E0F";
 void TestIpAddress() {
   PL::IpV4Address testIpV4AddressFromString(testIpV4AddressString);
   TEST_ASSERT(testIpV4AddressFromString.u32 == testIpV4Address.u32);
+  TEST_ASSERT(testIpV4AddressFromString == testIpV4Address);
+  testIpV4AddressFromString.u8[3] = 0;
+  TEST_ASSERT(testIpV4AddressFromString != testIpV4Address);
+  
   PL::IpV6Address testIpV6AddressFromString(testIpV6AddressString);
   for (int i = 0; i < sizeof(PL::IpV6Address::u8); i++) 
     TEST_ASSERT(testIpV6AddressFromString.u8[i] == testIpV6Address.u8[i]);
+  TEST_ASSERT(testIpV6AddressFromString == testIpV6Address);
+  testIpV6AddressFromString.u8[3] = 0;
+  TEST_ASSERT(testIpV6AddressFromString != testIpV6Address);
 }

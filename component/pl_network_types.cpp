@@ -47,6 +47,18 @@ std::string IpV4Address::ToString() const {
 
 //==============================================================================
 
+bool IpV4Address::operator==(const IpV4Address& address) {
+  return u32 == address.u32;
+}
+
+//==============================================================================
+
+bool IpV4Address::operator!=(const IpV4Address& address) {
+  return !(*this == address);
+}
+
+//==============================================================================
+
 IpV6Address::IpV6Address() {
   u32[0] = u32[1] = u32[2] = u32[3] = zoneId = 0;
 }
@@ -113,6 +125,18 @@ std::string IpV6Address::ToString() const {
     __builtin_bswap16(u16[0]), __builtin_bswap16(u16[1]), __builtin_bswap16(u16[2]), __builtin_bswap16(u16[3]),
     __builtin_bswap16(u16[4]), __builtin_bswap16(u16[5]), __builtin_bswap16(u16[6]), __builtin_bswap16(u16[7]), zoneId);
   return addressString;
+}
+
+//==============================================================================
+
+bool IpV6Address::operator==(const IpV6Address& address) {
+  return u32[0] == address.u32[0] && u32[1] == address.u32[1] && u32[2] == address.u32[2] && u32[3] == address.u32[3] && zoneId == address.zoneId;
+}
+
+//==============================================================================
+
+bool IpV6Address::operator!=(const IpV6Address& address) {
+  return !(*this == address);
 }
 
 //==============================================================================

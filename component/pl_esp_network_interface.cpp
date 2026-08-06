@@ -137,8 +137,8 @@ IpV6Address EspNetworkInterface::GetIpV6LinkLocalAddress() {
   LockGuard lg(*this);
   esp_ip6_addr_t ipInfo;
   if (esp_netif_get_ip6_linklocal(netif, &ipInfo) == ESP_OK)
-    return IpV6Address(*(IpV6Address*)&ipInfo.addr);
-  return IpV6Address();  
+    return IpV6Address(ipInfo.addr[0], ipInfo.addr[1], ipInfo.addr[2], ipInfo.addr[3], ipInfo.zone);
+  return IpV6Address();
 }
 
 //==============================================================================
@@ -147,8 +147,8 @@ IpV6Address EspNetworkInterface::GetIpV6GlobalAddress() {
   LockGuard lg(*this);
   esp_ip6_addr_t ipInfo;
   if(esp_netif_get_ip6_global(netif, &ipInfo) == ESP_OK)
-    return IpV6Address(*(IpV6Address*)&ipInfo.addr);
-  return IpV6Address();  
+    return IpV6Address(ipInfo.addr[0], ipInfo.addr[1], ipInfo.addr[2], ipInfo.addr[3], ipInfo.zone);
+  return IpV6Address();
 }
 
 //==============================================================================

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EspNetworkInterface::IsIpV4DhcpClientEnabled missing lock.
 - Ignored Disable/Enable errors in EspWiFiStation::SetSsid and SetPassword.
 - Ignored DHCP client start/stop errors in EspNetworkInterface.
+- Unsafe reinterpret-cast in EspNetworkInterface IPv6 address getters.
 
 ## [1.1.2] - 2024-09-26
 ### Added

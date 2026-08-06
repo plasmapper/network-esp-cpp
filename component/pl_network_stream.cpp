@@ -132,7 +132,7 @@ size_t NetworkStream::GetReadableSize() {
   timeval timeout = {};
   FD_ZERO(&set);
   FD_SET(sock, &set);
-  bool readyForRead = select(sock + 1, &set, NULL, NULL, &timeout);
+  bool readyForRead = select(sock + 1, &set, NULL, NULL, &timeout) > 0;
   if (readyForRead) {
     size_t dataSize = 0;
     ioctl(sock, FIONREAD, &dataSize);

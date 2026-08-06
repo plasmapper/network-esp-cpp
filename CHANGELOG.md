@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NetworkStream::GetReadableSize select() error handling.
 - EspWiFiStation and EspEthernet event handler thread safety.
 - EspNetworkInterface::IsIpV4DhcpClientEnabled missing lock.
+- Ignored Disable/Enable errors in EspWiFiStation::SetSsid and SetPassword.
 
 ## [1.1.2] - 2024-09-26
 ### Added

@@ -164,8 +164,8 @@ esp_err_t EspWiFiStation::SetSsid(const std::string& ssid) {
   this->ssid = ssid;
 
   if (enabled) {
-    Disable();
-    return Enable();
+    ESP_RETURN_ON_ERROR(Disable(), TAG, "disable failed");
+    ESP_RETURN_ON_ERROR(Enable(), TAG, "enable failed");
   }
   return ESP_OK;
 }
@@ -184,8 +184,8 @@ esp_err_t EspWiFiStation::SetPassword(const std::string& password) {
   this->password = password;
 
   if (enabled) {
-    Disable();
-    return Enable();
+    ESP_RETURN_ON_ERROR(Disable(), TAG, "disable failed");
+    ESP_RETURN_ON_ERROR(Enable(), TAG, "enable failed");
   }
   return ESP_OK;
 }

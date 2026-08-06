@@ -200,23 +200,30 @@ void EspWiFiStation::EventHandler(void* arg, esp_event_base_t eventBase, int32_t
       esp_wifi_connect();
     }
     if (eventID == WIFI_EVENT_STA_CONNECTED) {
-      wifiStation.connected = true;
-      esp_netif_create_ip6_linklocal(wifiStation.netif);
+      {
+        LockGuard lg(wifiStation);
+        wifiStation.connected = true;
+        esp_netif_create_ip6_linklocal(wifiStation.netif);
+        if (wifiStation.IsIpV4DhcpClientEnabled())
+          esp_netif_dhcpc_start(wifiStation.netif);
+        else
+          esp_netif_dhcpc_stop(wifiStation.netif);
+      }
       wifiStation.connectedEvent.Generate();
-      
-      if (wifiStation.IsIpV4DhcpClientEnabled())
-        esp_netif_dhcpc_start(wifiStation.netif);
-      else
-        esp_netif_dhcpc_stop(wifiStation.netif);
     }
     if (eventID == WIFI_EVENT_STA_DISCONNECTED) {
-      if (wifiStation.connected) {
+      bool wasConnected, isEnabled;
+      {
+        LockGuard lg(wifiStation);
+        wasConnected = wifiStation.connected;
         wifiStation.connected = false;
-        wifiStation.disconnectedEvent.Generate();
+        isEnabled = wifiStation.enabled;
       }
-      if (wifiStation.enabled)
+      if (wasConnected)
+        wifiStation.disconnectedEvent.Generate();
+      if (isEnabled)
         esp_wifi_connect();
-    }  
+    }
   }
 }
 

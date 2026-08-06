@@ -154,21 +154,27 @@ void EspEthernet::EventHandler(void* arg, esp_event_base_t eventBase, int32_t ev
 
   if (eventBase == ETH_EVENT) {
     if (eventID == ETHERNET_EVENT_CONNECTED) {
-      ethernet.connected = true;
-      esp_netif_create_ip6_linklocal(ethernet.netif);
+      {
+        LockGuard lg(ethernet);
+        ethernet.connected = true;
+        esp_netif_create_ip6_linklocal(ethernet.netif);
+        if (ethernet.IsIpV4DhcpClientEnabled())
+          esp_netif_dhcpc_start(ethernet.netif);
+        else
+          esp_netif_dhcpc_stop(ethernet.netif);
+      }
       ethernet.connectedEvent.Generate();
-      
-      if (ethernet.IsIpV4DhcpClientEnabled())
-        esp_netif_dhcpc_start(ethernet.netif);
-      else
-        esp_netif_dhcpc_stop(ethernet.netif);
     }
     if (eventID == ETHERNET_EVENT_DISCONNECTED) {
-      if (ethernet.connected) {
+      bool wasConnected;
+      {
+        LockGuard lg(ethernet);
+        wasConnected = ethernet.connected;
         ethernet.connected = false;
-        ethernet.disconnectedEvent.Generate();
       }
-    }  
+      if (wasConnected)
+        ethernet.disconnectedEvent.Generate();
+    }
   }
 }
 

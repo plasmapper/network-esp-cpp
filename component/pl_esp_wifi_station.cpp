@@ -111,8 +111,8 @@ esp_err_t EspWiFiStation::Enable() {
 
   wifi_config_t config;
   ESP_RETURN_ON_ERROR(esp_wifi_get_config(WIFI_IF_STA, &config), TAG, "get config failed");
-  snprintf((char*)config.sta.ssid, sizeof(config.sta.ssid), ssid.c_str());
-  snprintf((char*)config.sta.password, sizeof(config.sta.password), password.c_str());
+  snprintf((char*)config.sta.ssid, sizeof(config.sta.ssid), "%s", ssid.c_str());
+  snprintf((char*)config.sta.password, sizeof(config.sta.password), "%s", password.c_str());
   ESP_RETURN_ON_ERROR(esp_wifi_set_config(WIFI_IF_STA, &config), TAG, "set config failed");
 
   ESP_RETURN_ON_ERROR(esp_wifi_start(), TAG, "start failed");

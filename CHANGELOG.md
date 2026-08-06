@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Static const members to constexpr.
 - Documented TcpServer dual-stack dependency and HandleRequest threading model.
 
+### Security
+- Format string vulnerability in EspWiFiStation::Enable SSID/password handling.
+
 ### Fixed
 - Wrong parameter setting procedure in TcpServer::SetKeepAliveIdleTime.
 - WiFi station and Ethernet initialization rollback.

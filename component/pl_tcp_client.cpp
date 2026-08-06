@@ -46,40 +46,40 @@ esp_err_t TcpClient::Connect() {
   LockGuard lg(*this);
   if (stream->IsOpen())
     return ESP_OK;
-  int sock;
 
   int addressFamily = remoteEndpoint.address.family == NetworkAddressFamily::ipV4 ? AF_INET : AF_INET6;
-  if ((sock = socket(addressFamily, SOCK_STREAM, IPPROTO_TCP)) >= 0) {
-    bool connected = false;
+  int sock = socket(addressFamily, SOCK_STREAM, IPPROTO_TCP);
+  ESP_RETURN_ON_FALSE(sock >= 0, ESP_FAIL, TAG, "socket create failed (%d)", errno);
 
-    if (remoteEndpoint.address.family == NetworkAddressFamily::ipV4) {
-      sockaddr_in sockAddr = {};
-      sockAddr.sin_family = addressFamily;
-      sockAddr.sin_addr.s_addr = remoteEndpoint.address.ipV4.u32;
-      sockAddr.sin_port = htons(remoteEndpoint.port);
-      connected = (connect(sock, (sockaddr*)&sockAddr, sizeof(sockAddr)) == 0);
-    }
-    else {
-      sockaddr_in6 sockAddr = {};
-      sockAddr.sin6_family = addressFamily;
-      ((uint32_t*)&sockAddr.sin6_addr)[0] = remoteEndpoint.address.ipV6.u32[0];
-      ((uint32_t*)&sockAddr.sin6_addr)[1] = remoteEndpoint.address.ipV6.u32[1];
-      ((uint32_t*)&sockAddr.sin6_addr)[2] = remoteEndpoint.address.ipV6.u32[2];
-      ((uint32_t*)&sockAddr.sin6_addr)[3] = remoteEndpoint.address.ipV6.u32[3];
-      sockAddr.sin6_scope_id = remoteEndpoint.address.ipV6.zoneId;
-      sockAddr.sin6_port = htons(remoteEndpoint.port);
-      connected = (connect(sock, (sockaddr*)&sockAddr, sizeof(sockAddr)) == 0);
-    }
-
-    if (connected) {
-      stream = std::make_shared<NetworkStream>(sock);
-      ESP_RETURN_ON_ERROR((nagleAlgorithmEnabled ? stream->EnableNagleAlgorithm() : stream->DisableNagleAlgorithm()), TAG, "Nagle's algorithm set failed");
-      ESP_RETURN_ON_ERROR(stream->SetReadTimeout(readTimeout), TAG, "read timeout set failed");
-      return ESP_OK;
-    }
-    close(sock);
+  bool connected = false;
+  if (remoteEndpoint.address.family == NetworkAddressFamily::ipV4) {
+    sockaddr_in sockAddr = {};
+    sockAddr.sin_family = addressFamily;
+    sockAddr.sin_addr.s_addr = remoteEndpoint.address.ipV4.u32;
+    sockAddr.sin_port = htons(remoteEndpoint.port);
+    connected = (connect(sock, (sockaddr*)&sockAddr, sizeof(sockAddr)) == 0);
   }
-  ESP_RETURN_ON_ERROR(ESP_FAIL, TAG, "socket create failed (%d)", errno);
+  else {
+    sockaddr_in6 sockAddr = {};
+    sockAddr.sin6_family = addressFamily;
+    ((uint32_t*)&sockAddr.sin6_addr)[0] = remoteEndpoint.address.ipV6.u32[0];
+    ((uint32_t*)&sockAddr.sin6_addr)[1] = remoteEndpoint.address.ipV6.u32[1];
+    ((uint32_t*)&sockAddr.sin6_addr)[2] = remoteEndpoint.address.ipV6.u32[2];
+    ((uint32_t*)&sockAddr.sin6_addr)[3] = remoteEndpoint.address.ipV6.u32[3];
+    sockAddr.sin6_scope_id = remoteEndpoint.address.ipV6.zoneId;
+    sockAddr.sin6_port = htons(remoteEndpoint.port);
+    connected = (connect(sock, (sockaddr*)&sockAddr, sizeof(sockAddr)) == 0);
+  }
+
+  if (!connected) {
+    int connectErrno = errno;
+    close(sock);
+    ESP_RETURN_ON_ERROR(ESP_FAIL, TAG, "socket connect failed (%d)", connectErrno);
+  }
+
+  stream = std::make_shared<NetworkStream>(sock);
+  ESP_RETURN_ON_ERROR((nagleAlgorithmEnabled ? stream->EnableNagleAlgorithm() : stream->DisableNagleAlgorithm()), TAG, "Nagle's algorithm set failed");
+  ESP_RETURN_ON_ERROR(stream->SetReadTimeout(readTimeout), TAG, "read timeout set failed");
   return ESP_OK;
 }
 

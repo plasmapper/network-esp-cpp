@@ -14,7 +14,7 @@ public:
   /// @brief Default server task parameters
   static const TaskParameters defaultTaskParameters;
   /// @brief Default maximum number of server clients
-  static constexpr int defaultMaxNumberOfClients = 1;
+  static constexpr size_t defaultMaxNumberOfClients = 1;
   /// @brief Default idle time before the keep-alive packets are sent in seconds
   static constexpr int defaultKeepAliveIdleTime = 7200;
   /// @brief Default keep-alive packet interval in seconds
@@ -97,7 +97,7 @@ protected:
 private:
   Mutex mutex;
   uint16_t port = 0;
-  int maxNumberOfClients = defaultMaxNumberOfClients;
+  size_t maxNumberOfClients = defaultMaxNumberOfClients;
   std::vector<std::shared_ptr<NetworkStream>> clientStreams;
   TaskParameters taskParameters = defaultTaskParameters;
   bool nagleAlgorithmEnabled = true;

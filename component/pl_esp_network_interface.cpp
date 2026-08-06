@@ -21,8 +21,9 @@ EspNetworkInterface::~EspNetworkInterface() {
 esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
   LockGuard lg(*this);
   ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
+  esp_err_t error = esp_netif_dhcpc_start(netif);
+  ESP_RETURN_ON_FALSE(error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED, error, TAG, "DHCP client start failed");
   ipV4DhcpClientEnabled = true;
-  esp_netif_dhcpc_start(netif);
   return ESP_OK;
 }
 
@@ -31,8 +32,9 @@ esp_err_t EspNetworkInterface::EnableIpV4DhcpClient() {
 esp_err_t EspNetworkInterface::DisableIpV4DhcpClient() {
   LockGuard lg(*this);
   ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
+  esp_err_t error = esp_netif_dhcpc_stop(netif);
+  ESP_RETURN_ON_FALSE(error == ESP_OK || error == ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED, error, TAG, "DHCP client stop failed");
   ipV4DhcpClientEnabled = false;
-  esp_netif_dhcpc_stop(netif);
   return ESP_OK;
 }
 

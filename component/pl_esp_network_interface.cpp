@@ -53,6 +53,7 @@ esp_err_t EspNetworkInterface::DisableIpV6DhcpClient() {
 //==============================================================================
 
 bool EspNetworkInterface::IsIpV4DhcpClientEnabled() {
+  LockGuard lg(*this);
   return ipV4DhcpClientEnabled;
 }
 

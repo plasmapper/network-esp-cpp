@@ -187,9 +187,8 @@ esp_err_t TcpServer::SetTaskParameters(const TaskParameters& taskParameters) {
 esp_err_t TcpServer::SetKeepAliveIdleTime(int seconds) {
   LockGuard lg(*this);
   this->keepAliveIdleTime = seconds;
-  ESP_RETURN_ON_ERROR(RestartIfEnabled(), TAG, "restart failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
   return ESP_OK;
-  return SetStreamSocketOptions();
 }
 
 //==============================================================================

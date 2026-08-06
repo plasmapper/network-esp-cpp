@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lock timeout handling.
 - Static const members to constexpr.
 
+### Fixed
+- Wrong parameter setting procedure in TcpServer::SetKeepAliveIdleTime.
+
 ## [1.1.2] - 2024-09-26
 ### Added
 - IpV4Address and IpV6Address == and != operators.

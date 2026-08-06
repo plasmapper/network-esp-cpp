@@ -9,6 +9,10 @@ namespace PL {
 //==============================================================================
 
 /// @brief TCP server class
+/// @note Listens on a single IPv6 socket and relies on lwIP dual-stack support
+/// (IPV6_V6ONLY disabled, the ESP-IDF default) to accept IPv4 clients as well,
+/// via IPv4-mapped IPv6 addresses. If dual-stack support is disabled, only
+/// IPv6 clients will be able to connect.
 class TcpServer : public NetworkServer {
 public:
   /// @brief Default server task parameters
@@ -92,6 +96,11 @@ protected:
   /// @brief Handles the TCP client request
   /// @param clientStream client stream
   /// @return error code
+  /// @note Called from a single internal task that also accepts new clients
+  /// and services every other connected client in turn, and holds the
+  /// server's own lock while doing so. A slow or blocking implementation
+  /// delays new connections, all other clients, and any other thread's calls
+  /// into this server's public API until it returns.
   virtual esp_err_t HandleRequest(NetworkStream& clientStream) = 0;
 
 private:

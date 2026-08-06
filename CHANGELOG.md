@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Lock timeout handling.
 - Static const members to constexpr.
+- Documented TcpServer dual-stack dependency and HandleRequest threading model.
 
 ### Fixed
 - Wrong parameter setting procedure in TcpServer::SetKeepAliveIdleTime.

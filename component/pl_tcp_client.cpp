@@ -60,7 +60,7 @@ esp_err_t TcpClient::Connect() {
       connected = (connect(sock, (sockaddr*)&sockAddr, sizeof(sockAddr)) == 0);
     }
     else {
-      sockaddr_in6 sockAddr;
+      sockaddr_in6 sockAddr = {};
       sockAddr.sin6_family = addressFamily;
       ((uint32_t*)&sockAddr.sin6_addr)[0] = remoteEndpoint.address.ipV6.u32[0];
       ((uint32_t*)&sockAddr.sin6_addr)[1] = remoteEndpoint.address.ipV6.u32[1];

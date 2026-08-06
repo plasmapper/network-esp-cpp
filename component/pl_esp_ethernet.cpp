@@ -30,15 +30,10 @@ EspEthernet::EspEthernet(PhyNewFunction phyNewFunction, int32_t phyAddress, int 
 //==============================================================================
 
 EspEthernet::~EspEthernet() {
-  esp_event_handler_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler);
-
-  if (netifGlueHandle)
+  if (netif) {
+    esp_event_handler_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler);
     esp_eth_del_netif_glue(netifGlueHandle);
-
-  if (netif)
     esp_netif_destroy(netif);
-
-  if (handle) {
     esp_eth_stop(handle);
     esp_eth_driver_uninstall(handle);
   }
@@ -70,14 +65,41 @@ esp_err_t EspEthernet::Initialize() {
   esp_eth_phy_t* phy = phyNewFunction(&phyConfig);
   esp_eth_mac_t* mac = esp_eth_mac_new_esp32(&esp32EmacConfig, &macConfig);
   esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG(mac, phy);
-  ESP_RETURN_ON_ERROR(esp_eth_driver_install(&ethernetConfig, &handle), TAG, "driver install failed");
-  esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();
-  netif = esp_netif_new(&netifConfig);
-  netifGlueHandle = esp_eth_new_netif_glue(handle);
-  ESP_RETURN_ON_ERROR(esp_netif_attach(netif, netifGlueHandle), TAG, "netif attach failed");
 
-  ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
-  ESP_RETURN_ON_ERROR(InitializeNetif(netif), TAG, "initialize failed");
+  esp_eth_handle_t newHandle = NULL;
+  esp_err_t error = esp_eth_driver_install(&ethernetConfig, &newHandle);
+  if (error != ESP_OK)
+    ESP_RETURN_ON_ERROR(error, TAG, "driver install failed");
+
+  esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();
+  esp_netif_t* newNetif = esp_netif_new(&netifConfig);
+  esp_eth_netif_glue_handle_t newNetifGlueHandle = esp_eth_new_netif_glue(newHandle);
+
+  if ((error = esp_netif_attach(newNetif, newNetifGlueHandle)) != ESP_OK) {
+    esp_eth_del_netif_glue(newNetifGlueHandle);
+    esp_netif_destroy(newNetif);
+    esp_eth_driver_uninstall(newHandle);
+    ESP_RETURN_ON_ERROR(error, TAG, "netif attach failed");
+  }
+
+  if ((error = esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL)) != ESP_OK) {
+    esp_eth_del_netif_glue(newNetifGlueHandle);
+    esp_netif_destroy(newNetif);
+    esp_eth_driver_uninstall(newHandle);
+    ESP_RETURN_ON_ERROR(error, TAG, "event handler instance register failed");
+  }
+
+  if ((error = InitializeNetif(newNetif)) != ESP_OK) {
+    esp_event_handler_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+    esp_eth_del_netif_glue(newNetifGlueHandle);
+    esp_netif_destroy(newNetif);
+    esp_eth_driver_uninstall(newHandle);
+    ESP_RETURN_ON_ERROR(error, TAG, "network interface initialize failed");
+  }
+
+  handle = newHandle;
+  netif = newNetif;
+  netifGlueHandle = newNetifGlueHandle;
   return ESP_OK;
 }
 

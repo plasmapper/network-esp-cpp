@@ -23,10 +23,12 @@ EspWiFiStation::EspWiFiStation() {
 //==============================================================================
 
 EspWiFiStation::~EspWiFiStation() {
-  esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler);
-
-  if (netif)
+  if (netif) {
+    esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+    esp_wifi_stop();
+    esp_wifi_deinit();
     esp_netif_destroy_default_wifi(netif);
+  }
 }
 
 //==============================================================================
@@ -56,14 +58,46 @@ esp_err_t EspWiFiStation::Initialize() {
   wifi_config_t config = {};
   config.sta.pmf_cfg.capable = true;
 
-  netif = esp_netif_create_default_wifi_sta();
-  ESP_RETURN_ON_ERROR(esp_wifi_init(&wifiInitCfg), TAG, "init failed");
-  ESP_RETURN_ON_ERROR(esp_wifi_set_mode(WIFI_MODE_STA), TAG, "set mode failed");
-  ESP_RETURN_ON_ERROR(esp_wifi_set_ps(WIFI_PS_NONE), TAG, "set power save type failed");
-  ESP_RETURN_ON_ERROR(esp_wifi_set_config(WIFI_IF_STA, &config), TAG, "set config failed");
+  esp_netif_t* newNetif = esp_netif_create_default_wifi_sta();
+  
+  esp_err_t error = esp_wifi_init(&wifiInitCfg);
+  if (error != ESP_OK) {
+    esp_netif_destroy_default_wifi(newNetif);
+    ESP_RETURN_ON_ERROR(error, TAG, "init failed");
+  }
 
-  ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
-  ESP_RETURN_ON_ERROR(InitializeNetif(netif), TAG, "network interface initialize failed");
+  if ((error = esp_wifi_set_mode(WIFI_MODE_STA)) != ESP_OK) {
+    esp_wifi_deinit();
+    esp_netif_destroy_default_wifi(newNetif);
+    ESP_RETURN_ON_ERROR(error, TAG, "set mode failed");
+  }
+
+  if ((error = esp_wifi_set_ps(WIFI_PS_NONE)) != ESP_OK) {
+    esp_wifi_deinit();
+    esp_netif_destroy_default_wifi(newNetif);
+    ESP_RETURN_ON_ERROR(error, TAG, "set power save type failed");
+  }
+
+  if ((error = esp_wifi_set_config(WIFI_IF_STA, &config)) != ESP_OK) {
+    esp_wifi_deinit();
+    esp_netif_destroy_default_wifi(newNetif);
+    ESP_RETURN_ON_ERROR(error, TAG, "set config failed");
+  }
+
+  if ((error = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL)) != ESP_OK) {
+    esp_wifi_deinit();
+    esp_netif_destroy_default_wifi(newNetif);
+    ESP_RETURN_ON_ERROR(error, TAG, "event handler instance register failed");
+  }
+
+  if ((error = InitializeNetif(newNetif)) != ESP_OK) {
+    esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+    esp_wifi_deinit();
+    esp_netif_destroy_default_wifi(newNetif);
+    ESP_RETURN_ON_ERROR(error, TAG, "network interface initialize failed");
+  }
+
+  netif = newNetif;
   return ESP_OK;
 }
 

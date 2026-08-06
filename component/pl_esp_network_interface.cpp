@@ -159,8 +159,8 @@ esp_err_t EspNetworkInterface::SetIpV6GlobalAddress(IpV6Address address) {
 
 esp_err_t EspNetworkInterface::InitializeNetif(esp_netif_t* netif) {
   LockGuard lg(*this);
-  this->netif = netif;
   ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
+  this->netif = netif;
   return ESP_OK;
 }
 

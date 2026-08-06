@@ -10,9 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Static const members to constexpr.
 - Documented TcpServer dual-stack dependency and HandleRequest threading model.
 
-### Security
-- Format string vulnerability in EspWiFiStation::Enable SSID/password handling.
-
 ### Fixed
 - Wrong parameter setting procedure in TcpServer::SetKeepAliveIdleTime.
 - WiFi station and Ethernet initialization rollback.
@@ -25,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Uninitialized sockaddr_in6 in TcpClient::Connect.
 - Misleading error message on TcpClient::Connect connect failure.
 - TcpServer::maxNumberOfClients type mismatch with NetworkServer interface.
+- Incorrect string formatting in EspWiFiStation::Enable SSID/password handling.
+- NetworkStream::GetLocalEndpoint and GetRemoteEndpoint missing lock.
 
 ## [1.1.2] - 2024-09-26
 ### Added

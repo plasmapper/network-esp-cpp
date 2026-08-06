@@ -172,6 +172,7 @@ esp_err_t NetworkStream::SetReadTimeout(TickType_t timeout) {
 //==============================================================================
 
 NetworkEndpoint NetworkStream::GetLocalEndpoint() {
+  LockGuard lg(*this);
   sockaddr_storage sockAddr;
   socklen_t sockAddrSize = sizeof(sockAddr);
   
@@ -184,6 +185,7 @@ NetworkEndpoint NetworkStream::GetLocalEndpoint() {
 //==============================================================================
 
 NetworkEndpoint NetworkStream::GetRemoteEndpoint() {
+  LockGuard lg(*this);
   sockaddr_storage sockAddr;
   socklen_t sockAddrSize = sizeof(sockAddr);
   

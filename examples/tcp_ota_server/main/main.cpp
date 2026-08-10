@@ -5,7 +5,7 @@
 
 //==============================================================================
 
-const char * const TAG = "tcp_ota_server";
+static const char* TAG = "tcp_ota_server";
 
 const int firmwareVersion = 1;
 const int firmwareIsCompatibleWithHardware = true;

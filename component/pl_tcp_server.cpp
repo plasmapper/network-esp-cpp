@@ -239,7 +239,7 @@ void TcpServer::TaskCode(void* parameters) {
             clientStream++;
           else {
             server.clientDisconnectedEvent.Generate(**clientStream);
-            server.clientStreams.erase(clientStream);
+            clientStream = server.clientStreams.erase(clientStream);
           }
         }
 

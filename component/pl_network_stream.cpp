@@ -269,6 +269,8 @@ NetworkEndpoint NetworkStream::SockAddrToEndpoint(sockaddr_storage& sockAddr) {
       if (u32[0] == 0 && u32[1] == 0 && u32[2] == 0xFFFF0000)
         return NetworkEndpoint(IpV4Address(u32[3]), ntohs(((sockaddr_in*)&sockAddr)->sin_port));
       else
+        // sin6_scope_id (uint32_t) is narrowed to IpV6Address::zoneId (uint8_t)
+        // should be safe on ESP-IDF/lwIP where the scope ID is a netif index
         return NetworkEndpoint(IpV6Address(
           ((sockaddr_in6*)&sockAddr)->sin6_addr.un.u32_addr[0],
           ((sockaddr_in6*)&sockAddr)->sin6_addr.un.u32_addr[1],

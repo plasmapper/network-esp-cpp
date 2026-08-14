@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2026-08-14
 ### Added
 - Write operation timeout to NetworkStream and TcpClient.
 
@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Read misreporting a closed connection as a timeout.
 - IpV4Address and IpV6Address comparison operators not being const.
 - sprintf used instead of snprintf for address formatting.
+- Documentation of sin6_scope_id to IpV6Address::zoneId narrowing in SockAddrToEndpoint.
 
 ## [1.2.2] - 2026-08-11
 ### Fixed

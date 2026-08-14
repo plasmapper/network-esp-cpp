@@ -14,6 +14,8 @@ class NetworkStream : public Stream {
 public:
   /// @brief Default read operation timeout in FreeRTOS ticks
   static constexpr TickType_t defaultReadTimeout = 300 / portTICK_PERIOD_MS;
+  /// @brief Default write operation timeout in FreeRTOS ticks
+  static constexpr TickType_t defaultWriteTimeout = 300 / portTICK_PERIOD_MS;
 
   /// @brief Creates a closed network stream
   NetworkStream() {}
@@ -59,6 +61,9 @@ public:
   TickType_t GetReadTimeout() override;
   esp_err_t SetReadTimeout(TickType_t timeout) override;
 
+  TickType_t GetWriteTimeout() override;
+  esp_err_t SetWriteTimeout(TickType_t timeout) override;
+
   /// @brief Gets the local endpoint of the stream 
   /// @return local endpoint
   NetworkEndpoint GetLocalEndpoint();
@@ -86,6 +91,7 @@ private:
   Mutex mutex;
   int sock = -1;
   TickType_t readTimeout = defaultReadTimeout;
+  TickType_t writeTimeout = defaultWriteTimeout;
 
   NetworkEndpoint SockAddrToEndpoint(sockaddr_storage& sockAddr);
   esp_err_t SetSocketOption(int level, int option, int value);

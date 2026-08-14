@@ -9,6 +9,7 @@ const size_t maxNumberOfClients = 2;
 const PL::IpV4Address ipV4Address(127, 0, 0, 1);
 const PL::IpV6Address ipV6Address(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1);
 const TickType_t readTimeout = 1000 / portTICK_PERIOD_MS;
+const TickType_t writeTimeout = 500 / portTICK_PERIOD_MS;
 const uint8_t dataToSend[] = {1, 2, 3, 4, 5};
 const uint8_t disableDataToSend[] = {0xFE, 0, 0, 0, 0};
 const uint8_t restartDataToSend[] = {0xFF, 0, 0, 0, 0};
@@ -32,9 +33,15 @@ void TestTcp() {
   TEST_ASSERT(ipV4Client.SetReadTimeout(readTimeout) == ESP_OK);
   TEST_ASSERT_EQUAL(readTimeout, ipV4Client.GetReadTimeout());
 
+  TEST_ASSERT_EQUAL(PL::NetworkStream::defaultWriteTimeout, ipV4Client.GetWriteTimeout());
+  TEST_ASSERT_EQUAL(PL::NetworkStream::defaultWriteTimeout, ipV4Client.GetStream()->GetWriteTimeout());
+  TEST_ASSERT(ipV4Client.SetWriteTimeout(writeTimeout) == ESP_OK);
+  TEST_ASSERT_EQUAL(writeTimeout, ipV4Client.GetWriteTimeout());
+
   TEST_ASSERT(ipV4Client.Connect() == ESP_OK);
   TEST_ASSERT(ipV4Client.IsConnected());
   TEST_ASSERT_EQUAL(readTimeout, ipV4Client.GetStream()->GetReadTimeout());
+  TEST_ASSERT_EQUAL(writeTimeout, ipV4Client.GetStream()->GetWriteTimeout());
   vTaskDelay(10);
   TEST_ASSERT_EQUAL(1, server.GetClientStreams().size());
 

@@ -95,7 +95,7 @@ esp_err_t TcpServer::Disable() {
 esp_err_t TcpServer::EnableNagleAlgorithm() {
   LockGuard lg(*this);
   this->nagleAlgorithmEnabled = true;
-  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "set stream socket options failed");
   return ESP_OK;
 }
 
@@ -104,7 +104,7 @@ esp_err_t TcpServer::EnableNagleAlgorithm() {
 esp_err_t TcpServer::DisableNagleAlgorithm() {
   LockGuard lg(*this);
   this->nagleAlgorithmEnabled = false;
-  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "set stream socket options failed");
   return ESP_OK;
 }
 
@@ -113,7 +113,7 @@ esp_err_t TcpServer::DisableNagleAlgorithm() {
 esp_err_t TcpServer::EnableKeepAlive() {
   LockGuard lg(*this);
   this->keepAliveEnabled = true;
-  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "set stream socket options failed");
   return ESP_OK;
 }
 
@@ -122,7 +122,7 @@ esp_err_t TcpServer::EnableKeepAlive() {
 esp_err_t TcpServer::DisableKeepAlive() {
   LockGuard lg(*this);
   this->keepAliveEnabled = false;
-  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "set stream socket options failed");
   return ESP_OK;
 }
 
@@ -187,7 +187,7 @@ esp_err_t TcpServer::SetTaskParameters(const TaskParameters& taskParameters) {
 esp_err_t TcpServer::SetKeepAliveIdleTime(int seconds) {
   LockGuard lg(*this);
   this->keepAliveIdleTime = seconds;
-  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "set stream socket options failed");
   return ESP_OK;
 }
 
@@ -196,7 +196,7 @@ esp_err_t TcpServer::SetKeepAliveIdleTime(int seconds) {
 esp_err_t TcpServer::SetKeepAliveInterval(int seconds) {
   LockGuard lg(*this);
   this->keepAliveInterval = seconds;
-  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "set stream socket options failed");
   return ESP_OK;
 }
 
@@ -205,7 +205,7 @@ esp_err_t TcpServer::SetKeepAliveInterval(int seconds) {
 esp_err_t TcpServer::SetKeepAliveCount(int count) {
   LockGuard lg(*this);
   this->keepAliveCount = count;
-  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(SetStreamSocketOptions(), TAG, "set stream socket options failed");
   return ESP_OK;
 }
 
@@ -220,7 +220,7 @@ esp_err_t TcpServer::SetStreamSocketOptions() {
     error = clientStream->SetKeepAliveInterval(keepAliveInterval) == ESP_OK ? error : ESP_FAIL;
     error = clientStream->SetKeepAliveCount(keepAliveCount) == ESP_OK ? error : ESP_FAIL;
   }
-  ESP_RETURN_ON_ERROR(error, TAG, "stream socket options set failed");
+  ESP_RETURN_ON_ERROR(error, TAG, "stream set socket options failed");
   return ESP_OK;
 }
 

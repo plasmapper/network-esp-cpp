@@ -78,8 +78,9 @@ esp_err_t TcpClient::Connect() {
   }
 
   stream = std::make_shared<NetworkStream>(sock);
-  ESP_RETURN_ON_ERROR((nagleAlgorithmEnabled ? stream->EnableNagleAlgorithm() : stream->DisableNagleAlgorithm()), TAG, "Nagle's algorithm set failed");
-  ESP_RETURN_ON_ERROR(stream->SetReadTimeout(readTimeout), TAG, "read timeout set failed");
+  ESP_RETURN_ON_ERROR((nagleAlgorithmEnabled ? stream->EnableNagleAlgorithm() : stream->DisableNagleAlgorithm()), TAG, "set Nagle's algorithm failed");
+  ESP_RETURN_ON_ERROR(stream->SetReadTimeout(readTimeout), TAG, "set read timeout failed");
+  ESP_RETURN_ON_ERROR(stream->SetWriteTimeout(writeTimeout), TAG, "set write timeout failed");
   return ESP_OK;
 }
 
@@ -128,7 +129,23 @@ TickType_t TcpClient::GetReadTimeout() {
 esp_err_t TcpClient::SetReadTimeout(TickType_t timeout) {
   LockGuard lg(*this);
   this->readTimeout = timeout;
-  ESP_RETURN_ON_ERROR(stream->SetReadTimeout(timeout), TAG, "stream read timeout set failed");
+  ESP_RETURN_ON_ERROR(stream->SetReadTimeout(timeout), TAG, "stream set read timeout failed");
+  return ESP_OK;
+}
+
+//==============================================================================
+
+TickType_t TcpClient::GetWriteTimeout() {
+  LockGuard lg(*this);
+  return writeTimeout;
+}
+
+//==============================================================================
+
+esp_err_t TcpClient::SetWriteTimeout(TickType_t timeout) {
+  LockGuard lg(*this);
+  this->writeTimeout = timeout;
+  ESP_RETURN_ON_ERROR(stream->SetWriteTimeout(timeout), TAG, "stream set write timeout failed");
   return ESP_OK;
 }
 

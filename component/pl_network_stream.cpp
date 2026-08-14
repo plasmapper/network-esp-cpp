@@ -13,6 +13,7 @@ namespace PL {
 
 NetworkStream::NetworkStream(int sock) : sock(sock) {
   SetReadTimeout(defaultReadTimeout);
+  SetWriteTimeout(defaultWriteTimeout);
 }
 
 //==============================================================================
@@ -66,9 +67,14 @@ esp_err_t NetworkStream::Write(const void* src, size_t size) {
   if (!size)
     return ESP_OK;
   ESP_RETURN_ON_FALSE(src, ESP_ERR_INVALID_ARG, TAG, "src is null");
-  
-  if (send(sock, src, size, 0) == size)
+
+  int res;
+  for (; size && (res = send(sock, src, size, 0)) > 0; size -= res, src = (const uint8_t*)src + res);
+
+  if (!size)
     return ESP_OK;
+
+  ESP_RETURN_ON_FALSE(errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");
 
   Close();
   ESP_RETURN_ON_ERROR(ESP_FAIL, TAG, "write failed");
@@ -165,7 +171,32 @@ esp_err_t NetworkStream::SetReadTimeout(TickType_t timeout) {
     tv.tv_sec = timeoutMs / 1000;
     tv.tv_usec = (timeoutMs % 1000) * 1000;
   }
-  ESP_RETURN_ON_FALSE(setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "socket option set failed (%d)", errno);
+  ESP_RETURN_ON_FALSE(setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "set socket option failed (%d)", errno);
+  return ESP_OK;
+}
+
+//==============================================================================
+
+TickType_t NetworkStream::GetWriteTimeout() {
+  LockGuard lg(*this);
+  return writeTimeout;
+}
+
+//==============================================================================
+
+esp_err_t NetworkStream::SetWriteTimeout(TickType_t timeout) {
+  LockGuard lg(*this);
+  this->writeTimeout = timeout;
+  if (sock < 0)
+    return ESP_OK;
+
+  timeval tv = {};
+  if (timeout != portMAX_DELAY) {
+    uint32_t timeoutMs = timeout * portTICK_PERIOD_MS;
+    tv.tv_sec = timeoutMs / 1000;
+    tv.tv_usec = (timeoutMs % 1000) * 1000;
+  }
+  ESP_RETURN_ON_FALSE(setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) >= 0, ESP_FAIL, TAG, "set socket option failed (%d)", errno);
   return ESP_OK;
 }
 
@@ -198,21 +229,21 @@ NetworkEndpoint NetworkStream::GetRemoteEndpoint() {
 //==============================================================================
 
 esp_err_t NetworkStream::SetKeepAliveIdleTime(int seconds) {
-  ESP_RETURN_ON_ERROR(SetSocketOption(IPPROTO_TCP, TCP_KEEPIDLE, seconds), TAG, "keep-alive idle time set failed");
+  ESP_RETURN_ON_ERROR(SetSocketOption(IPPROTO_TCP, TCP_KEEPIDLE, seconds), TAG, "set keep-alive idle time failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::SetKeepAliveInterval(int seconds) {
-  ESP_RETURN_ON_ERROR(SetSocketOption(IPPROTO_TCP, TCP_KEEPINTVL, seconds), TAG, "keep-alive interval set failed");
+  ESP_RETURN_ON_ERROR(SetSocketOption(IPPROTO_TCP, TCP_KEEPINTVL, seconds), TAG, "set keep-alive interval failed");
   return ESP_OK;
 }
 
 //==============================================================================
 
 esp_err_t NetworkStream::SetKeepAliveCount(int count) {
-  ESP_RETURN_ON_ERROR(SetSocketOption(IPPROTO_TCP, TCP_KEEPCNT, count), TAG, "keep-alive count set failed");
+  ESP_RETURN_ON_ERROR(SetSocketOption(IPPROTO_TCP, TCP_KEEPCNT, count), TAG, "set keep-alive count failed");
   return ESP_OK;
 }
 
@@ -222,7 +253,7 @@ esp_err_t NetworkStream::SetSocketOption(int level, int option, int value) {
   LockGuard lg(*this);
   if (sock < 0)
     return ESP_OK;
-  ESP_RETURN_ON_FALSE(setsockopt(sock, level, option, (void*)&value, sizeof(value)) >= 0, ESP_FAIL, TAG, "socket option set failed (%d)", errno);
+  ESP_RETURN_ON_FALSE(setsockopt(sock, level, option, (void*)&value, sizeof(value)) >= 0, ESP_FAIL, TAG, "set socket option failed (%d)", errno);
   return ESP_OK;
 }
 

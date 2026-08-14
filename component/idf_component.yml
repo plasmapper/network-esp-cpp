@@ -4,4 +4,4 @@ description: Network C++ class component for ESP-IDF
 url: https://github.com/plasmapper/network-esp-cpp
 dependencies:
   idf: ">=5.3,<7.0"
-  plasmapper/pl_common: "^1.3.0"
+  plasmapper/pl_common: "^2.0.0"

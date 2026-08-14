@@ -50,10 +50,19 @@ public:
   /// @return timeout in FreeRTOS ticks
   TickType_t GetReadTimeout();
 
-  /// @brief Sets the read operation timeout 
+  /// @brief Sets the read operation timeout
   /// @param timeout timeout in FreeRTOS ticks
   /// @return error code
   esp_err_t SetReadTimeout(TickType_t timeout);
+
+  /// @brief Gets the write operation timeout
+  /// @return timeout in FreeRTOS ticks
+  TickType_t GetWriteTimeout();
+
+  /// @brief Sets the write operation timeout
+  /// @param timeout timeout in FreeRTOS ticks
+  /// @return error code
+  esp_err_t SetWriteTimeout(TickType_t timeout);
 
   /// @brief Gets the local endpoint of the client
   /// @return local endpoint
@@ -84,6 +93,7 @@ private:
   NetworkEndpoint remoteEndpoint;
   std::shared_ptr<NetworkStream> stream;
   TickType_t readTimeout = NetworkStream::defaultReadTimeout;
+  TickType_t writeTimeout = NetworkStream::defaultWriteTimeout;
   bool nagleAlgorithmEnabled = true;
 };
 

@@ -41,7 +41,7 @@ IpV4Address::IpV4Address(const std::string& address) {
 
 std::string IpV4Address::ToString() const {
   char addressString[16];
-  sprintf(addressString, "%d.%d.%d.%d", u8[0], u8[1], u8[2], u8[3]);
+  snprintf(addressString, sizeof(addressString), "%d.%d.%d.%d", u8[0], u8[1], u8[2], u8[3]);
   return addressString;
 }
 
@@ -121,7 +121,7 @@ IpV6Address::IpV6Address(const std::string& address) {
 
 std::string IpV6Address::ToString() const {
   char addressString[44];
-  sprintf(addressString, "%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x%%%d",
+  snprintf(addressString, sizeof(addressString), "%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x%%%d",
     __builtin_bswap16(u16[0]), __builtin_bswap16(u16[1]), __builtin_bswap16(u16[2]), __builtin_bswap16(u16[3]),
     __builtin_bswap16(u16[4]), __builtin_bswap16(u16[5]), __builtin_bswap16(u16[6]), __builtin_bswap16(u16[7]), zoneId);
   return addressString;

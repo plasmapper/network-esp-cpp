@@ -47,13 +47,13 @@ std::string IpV4Address::ToString() const {
 
 //==============================================================================
 
-bool IpV4Address::operator==(const IpV4Address& address) {
+bool IpV4Address::operator==(const IpV4Address& address) const {
   return u32 == address.u32;
 }
 
 //==============================================================================
 
-bool IpV4Address::operator!=(const IpV4Address& address) {
+bool IpV4Address::operator!=(const IpV4Address& address) const {
   return !(*this == address);
 }
 
@@ -129,13 +129,13 @@ std::string IpV6Address::ToString() const {
 
 //==============================================================================
 
-bool IpV6Address::operator==(const IpV6Address& address) {
+bool IpV6Address::operator==(const IpV6Address& address) const {
   return u32[0] == address.u32[0] && u32[1] == address.u32[1] && u32[2] == address.u32[2] && u32[3] == address.u32[3] && zoneId == address.zoneId;
 }
 
 //==============================================================================
 
-bool IpV6Address::operator!=(const IpV6Address& address) {
+bool IpV6Address::operator!=(const IpV6Address& address) const {
   return !(*this == address);
 }
 

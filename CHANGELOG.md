@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Event handler register/unregister.
 - Read misreporting a closed connection as a timeout.
+- IpV4Address and IpV6Address comparison operators not being const.
 
 ## [1.2.2] - 2026-08-11
 ### Fixed

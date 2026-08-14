@@ -50,8 +50,8 @@ struct IpV4Address {
   /// @return address as string
   std::string ToString() const;
 
-  bool operator==(const IpV4Address& address);
-  bool operator!=(const IpV4Address& address);
+  bool operator==(const IpV4Address& address) const;
+  bool operator!=(const IpV4Address& address) const;
 };
 
 //==============================================================================
@@ -89,8 +89,8 @@ struct IpV6Address {
   /// @return address as string
   std::string ToString() const;
 
-  bool operator==(const IpV6Address& address);
-  bool operator!=(const IpV6Address& address);
+  bool operator==(const IpV6Address& address) const;
+  bool operator!=(const IpV6Address& address) const;
 };
 
 //==============================================================================

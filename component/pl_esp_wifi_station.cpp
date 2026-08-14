@@ -24,7 +24,7 @@ EspWiFiStation::EspWiFiStation() {
 
 EspWiFiStation::~EspWiFiStation() {
   if (netif) {
-    esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+    esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);
     esp_wifi_stop();
     esp_wifi_deinit();
     esp_netif_destroy_default_wifi(netif);
@@ -84,14 +84,14 @@ esp_err_t EspWiFiStation::Initialize() {
     ESP_RETURN_ON_ERROR(error, TAG, "set config failed");
   }
 
-  if ((error = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL)) != ESP_OK) {
+  if ((error = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, &eventHandlerInstance)) != ESP_OK) {
     esp_wifi_deinit();
     esp_netif_destroy_default_wifi(newNetif);
     ESP_RETURN_ON_ERROR(error, TAG, "event handler instance register failed");
   }
 
   if ((error = InitializeNetif(newNetif)) != ESP_OK) {
-    esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+    esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);
     esp_wifi_deinit();
     esp_netif_destroy_default_wifi(newNetif);
     ESP_RETURN_ON_ERROR(error, TAG, "network interface initialize failed");

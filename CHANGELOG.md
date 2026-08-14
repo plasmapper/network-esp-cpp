@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Write operation timeout to NetworkStream and TcpClient.
 
+### Fixed
+- Event handler register/unregister.
+
 ## [1.2.2] - 2026-08-11
 ### Fixed
 - Invalid iterator use in TcpServer::TaskCode.

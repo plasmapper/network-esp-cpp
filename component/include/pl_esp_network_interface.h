@@ -45,6 +45,7 @@ protected:
 
 private:
   esp_netif_t* netif = NULL;
+  esp_event_handler_instance_t eventHandlerInstance = NULL;
   bool ipV4DhcpClientEnabled = false;
 
   static void EventHandler(void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData);

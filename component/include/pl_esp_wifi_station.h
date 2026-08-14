@@ -41,6 +41,7 @@ public:
 private:
   Mutex mutex;
   esp_netif_t* netif = NULL;
+  esp_event_handler_instance_t eventHandlerInstance = NULL;
   bool enabled = false, connected = false;
   std::string ssid, password;
 

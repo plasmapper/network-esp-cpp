@@ -31,7 +31,7 @@ EspEthernet::EspEthernet(PhyNewFunction phyNewFunction, int32_t phyAddress, int 
 
 EspEthernet::~EspEthernet() {
   if (netif) {
-    esp_event_handler_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+    esp_event_handler_instance_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);
     esp_eth_del_netif_glue(netifGlueHandle);
     esp_netif_destroy(netif);
     esp_eth_stop(handle);
@@ -82,7 +82,7 @@ esp_err_t EspEthernet::Initialize() {
     ESP_RETURN_ON_ERROR(error, TAG, "netif attach failed");
   }
 
-  if ((error = esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL)) != ESP_OK) {
+  if ((error = esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, &eventHandlerInstance)) != ESP_OK) {
     esp_eth_del_netif_glue(newNetifGlueHandle);
     esp_netif_destroy(newNetif);
     esp_eth_driver_uninstall(newHandle);
@@ -90,7 +90,7 @@ esp_err_t EspEthernet::Initialize() {
   }
 
   if ((error = InitializeNetif(newNetif)) != ESP_OK) {
-    esp_event_handler_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+    esp_event_handler_instance_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);
     esp_eth_del_netif_glue(newNetifGlueHandle);
     esp_netif_destroy(newNetif);
     esp_eth_driver_uninstall(newHandle);

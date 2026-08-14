@@ -13,7 +13,8 @@ namespace PL {
 //==============================================================================
 
 EspNetworkInterface::~EspNetworkInterface() {
-  esp_event_handler_unregister(IP_EVENT, ESP_EVENT_ANY_ID, EventHandler);
+  if (netif)
+    esp_event_handler_instance_unregister(IP_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);
 }
 
 //==============================================================================
@@ -162,7 +163,7 @@ esp_err_t EspNetworkInterface::SetIpV6GlobalAddress(IpV6Address address) {
 
 esp_err_t EspNetworkInterface::InitializeNetif(esp_netif_t* netif) {
   LockGuard lg(*this);
-  ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, NULL), TAG, "event handler instance register failed");
+  ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, &eventHandlerInstance), TAG, "event handler instance register failed");
   this->netif = netif;
   return ESP_OK;
 }

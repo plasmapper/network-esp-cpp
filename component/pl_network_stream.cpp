@@ -45,8 +45,9 @@ esp_err_t NetworkStream::Read(void* dest, size_t size) {
     for (; size && (res = recv(sock, (uint8_t*)dest, size, 0)) > 0; size -= res, dest = (uint8_t*)dest + res);
   }
   else {
-    uint8_t data;
-    for (; size && (res = recv(sock, &data, 1, 0)) == 1; size--);
+    constexpr size_t discardBufferSize = 64;
+    uint8_t discardBuffer[discardBufferSize];
+    for (; size && (res = recv(sock, discardBuffer, std::min(size, discardBufferSize), 0)) > 0; size -= res);
   }
 
   if (!size)

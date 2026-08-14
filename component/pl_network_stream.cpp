@@ -40,19 +40,20 @@ esp_err_t NetworkStream::Read(void* dest, size_t size) {
   if (!size)
     return ESP_OK;
  
-  int res;
+  int res = 0;
   if (dest) {
     for (; size && (res = recv(sock, (uint8_t*)dest, size, 0)) > 0; size -= res, dest = (uint8_t*)dest + res);
   }
   else {
     uint8_t data;
-    for (; size && recv(sock, &data, 1, 0) == 1; size--);
+    for (; size && (res = recv(sock, &data, 1, 0)) == 1; size--);
   }
 
   if (!size)
     return ESP_OK;
 
-  ESP_RETURN_ON_FALSE(errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");
+  // res = 0 means the peer closed the connection
+  ESP_RETURN_ON_FALSE(res == 0 || errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");
 
   Close();
   ESP_RETURN_ON_ERROR(ESP_FAIL, TAG, "read failed");

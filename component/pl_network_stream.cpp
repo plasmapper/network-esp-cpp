@@ -40,15 +40,27 @@ esp_err_t NetworkStream::Read(void* dest, size_t size) {
   if (!size)
     return ESP_OK;
  
+  TimeOut_t xTimeOut;
+  vTaskSetTimeOutState(&xTimeOut);
+  TickType_t remainingTimeout = readTimeout;
+
   int res = 0;
-  if (dest) {
-    for (; size && (res = recv(sock, (uint8_t*)dest, size, 0)) > 0; size -= res, dest = (uint8_t*)dest + res);
-  }
-  else {
-    constexpr size_t discardBufferSize = 64;
-    uint8_t discardBuffer[discardBufferSize];
-    for (; size && (res = recv(sock, discardBuffer, std::min(size, discardBufferSize), 0)) > 0; size -= res);
-  }
+  do {
+    if (dest) {
+      res = recv(sock, (uint8_t*)dest, size, 0);
+      if (res > 0) {
+        size -= res;
+        dest = (uint8_t*)dest + res;
+      }
+    }
+    else {
+      constexpr size_t discardBufferSize = 64;
+      uint8_t discardBuffer[discardBufferSize];
+      res = recv(sock, discardBuffer, std::min(size, discardBufferSize), 0);
+      if (res > 0)
+        size -= res;
+    }
+  } while (size && (res > 0 || (res < 0 && errno == EAGAIN)) && xTaskCheckForTimeOut(&xTimeOut, &remainingTimeout) == pdFALSE);
 
   if (!size)
     return ESP_OK;
@@ -70,8 +82,18 @@ esp_err_t NetworkStream::Write(const void* src, size_t size) {
     return ESP_OK;
   ESP_RETURN_ON_FALSE(src, ESP_ERR_INVALID_ARG, TAG, "src is null");
 
+  TimeOut_t xTimeOut;
+  vTaskSetTimeOutState(&xTimeOut);
+  TickType_t remainingTimeout = writeTimeout;
+
   int res;
-  for (; size && (res = send(sock, src, size, 0)) > 0; size -= res, src = (const uint8_t*)src + res);
+  do {
+    res = send(sock, src, size, 0);
+    if (res > 0) {
+      size -= res;
+      src = (const uint8_t*)src + res;
+    }
+  } while (size && (res > 0 || (res < 0 && errno == EAGAIN)) && xTaskCheckForTimeOut(&xTimeOut, &remainingTimeout) == pdFALSE);
 
   if (!size)
     return ESP_OK;

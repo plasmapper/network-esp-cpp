@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - EspNetworkInterface IPv4 events not filtered by netif and Ethernet IP-lost event ignored.
+- Unsynchronized TcpServer task state flags.
 
 ## [1.3.2] - 2026-08-17
 ### Fixed

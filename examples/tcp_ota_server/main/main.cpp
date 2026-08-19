@@ -107,14 +107,15 @@ esp_err_t OtaServer::HandleRequest(PL::NetworkStream& clientStream) {
   printf("Receiving new firmware (size: %lu)\n", firmwareSize);
 
   esp_err_t result = UpdateFirmware(clientStream, &firmwareSize, esp_ota_get_next_update_partition(NULL), &updateHandle);
-  if (result != ESP_OK && result != ESP_ERR_TIMEOUT)
-    clientStream.Read(NULL, firmwareSize);
-  ESP_RETURN_ON_ERROR(result, TAG, "firmware update failed");
+  if (result != ESP_OK) {
+    if (result != ESP_ERR_TIMEOUT)
+      clientStream.Read(NULL, firmwareSize);
+    if (updateHandle != 0)
+      esp_ota_abort(updateHandle);
+    ESP_RETURN_ON_ERROR(result, TAG, "firmware update failed");
+  }
 
-  if (updateHandle != 0)
-    esp_ota_abort(updateHandle);
-
-  return ESP_OK; 
+  return ESP_OK;
 }
 
 //==============================================================================

@@ -54,6 +54,8 @@ private:
   eth_esp32_emac_config_t esp32EmacConfig = ETH_ESP32_EMAC_DEFAULT_CONFIG();
   esp_eth_handle_t handle = NULL;
   esp_eth_netif_glue_handle_t netifGlueHandle = NULL;
+  esp_eth_mac_t* mac = NULL;
+  esp_eth_phy_t* phy = NULL;
 
   static void EventHandler(void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData);
 };

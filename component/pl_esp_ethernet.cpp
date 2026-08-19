@@ -36,6 +36,8 @@ EspEthernet::~EspEthernet() {
     esp_netif_destroy(netif);
     esp_eth_stop(handle);
     esp_eth_driver_uninstall(handle);
+    mac->del(mac);
+    phy->del(phy);
   }
 }
 
@@ -62,14 +64,17 @@ esp_err_t EspEthernet::Initialize() {
   if (netif)
     return ESP_OK;
 
-  esp_eth_phy_t* phy = phyNewFunction(&phyConfig);
-  esp_eth_mac_t* mac = esp_eth_mac_new_esp32(&esp32EmacConfig, &macConfig);
-  esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG(mac, phy);
+  esp_eth_phy_t* newPhy = phyNewFunction(&phyConfig);
+  esp_eth_mac_t* newMac = esp_eth_mac_new_esp32(&esp32EmacConfig, &macConfig);
+  esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG(newMac, newPhy);
 
   esp_eth_handle_t newHandle = NULL;
   esp_err_t error = esp_eth_driver_install(&ethernetConfig, &newHandle);
-  if (error != ESP_OK)
+  if (error != ESP_OK) {
+    newMac->del(newMac);
+    newPhy->del(newPhy);
     ESP_RETURN_ON_ERROR(error, TAG, "driver install failed");
+  }
 
   esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();
   esp_netif_t* newNetif = esp_netif_new(&netifConfig);
@@ -79,6 +84,8 @@ esp_err_t EspEthernet::Initialize() {
     esp_eth_del_netif_glue(newNetifGlueHandle);
     esp_netif_destroy(newNetif);
     esp_eth_driver_uninstall(newHandle);
+    newMac->del(newMac);
+    newPhy->del(newPhy);
     ESP_RETURN_ON_ERROR(error, TAG, "netif attach failed");
   }
 
@@ -86,6 +93,8 @@ esp_err_t EspEthernet::Initialize() {
     esp_eth_del_netif_glue(newNetifGlueHandle);
     esp_netif_destroy(newNetif);
     esp_eth_driver_uninstall(newHandle);
+    newMac->del(newMac);
+    newPhy->del(newPhy);
     ESP_RETURN_ON_ERROR(error, TAG, "event handler instance register failed");
   }
 
@@ -94,12 +103,16 @@ esp_err_t EspEthernet::Initialize() {
     esp_eth_del_netif_glue(newNetifGlueHandle);
     esp_netif_destroy(newNetif);
     esp_eth_driver_uninstall(newHandle);
+    newMac->del(newMac);
+    newPhy->del(newPhy);
     ESP_RETURN_ON_ERROR(error, TAG, "network interface initialize failed");
   }
 
   handle = newHandle;
   netif = newNetif;
   netifGlueHandle = newNetifGlueHandle;
+  mac = newMac;
+  phy = newPhy;
   return ESP_OK;
 }
 

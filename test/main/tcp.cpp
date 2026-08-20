@@ -114,6 +114,12 @@ void TestTcp() {
 
 //==============================================================================
 
+TcpServer::~TcpServer() {
+  StopTask();
+}
+
+//==============================================================================
+
 esp_err_t TcpServer::HandleRequest(PL::NetworkStream& stream) {
   uint8_t dataByte;
   while (stream.GetReadableSize()) {

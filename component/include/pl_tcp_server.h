@@ -35,6 +35,9 @@ public:
   /// @brief Creates a TCP server
   /// @param port port
   TcpServer(uint16_t port);
+
+  /// @note Every derived class must call StopTask as the first statement of its
+  /// own destructor so that TaskCode does not call HandleRequest on a partially destroyed object.
   ~TcpServer();
   TcpServer(const TcpServer&) = delete;
   TcpServer& operator=(const TcpServer&) = delete;
@@ -94,6 +97,12 @@ public:
   esp_err_t SetKeepAliveCount(int count);
 
 protected:
+  /// @brief Stops the server task, closes the client streams and waits for the task to exit
+  /// @note Must be called as the first statement of the destructor of every derived class
+  /// so that TaskCode does not call HandleRequest on a partially destroyed object.
+  /// @return error code
+  esp_err_t StopTask();
+
   /// @brief Handles the TCP client request
   /// @param clientStream client stream
   /// @return error code

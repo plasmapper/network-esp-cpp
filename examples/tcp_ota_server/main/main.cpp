@@ -17,6 +17,7 @@ public:
   static const uint16_t defaultPort = 3232;
 
   OtaServer();
+  ~OtaServer();
 
 protected:
   esp_err_t HandleRequest(PL::NetworkStream& clientStream) override;
@@ -93,6 +94,12 @@ extern "C" void app_main(void) {
 //==============================================================================
 
 OtaServer::OtaServer() : TcpServer(defaultPort) {}
+
+//==============================================================================
+
+OtaServer::~OtaServer() {
+  StopTask();
+}
 
 //==============================================================================
 

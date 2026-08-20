@@ -5,6 +5,7 @@
 class TcpServer : public PL::TcpServer {
 public:
   using PL::TcpServer::TcpServer;
+  ~TcpServer();
 
 protected:
   esp_err_t HandleRequest(PL::NetworkStream& clientStream) override;

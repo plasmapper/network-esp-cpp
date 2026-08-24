@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EspEthernet and EspWiFiStation destructors freeing driver resources before the driver was safely stopped.
 - Missing socket ownership documentation for the NetworkStream constructor.
 - EspEthernet::Initialize and EspWiFiStation::Initialize not checking driver and netif creation results before use.
+- NetworkAddress default constructor leaving the address union uninitialized.
 - EspEthernet::Initialize not checking the PHY, MAC, netif or netif glue creation results before use.
 
 ## [1.3.3] - 2026-08-19

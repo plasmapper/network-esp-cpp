@@ -141,7 +141,7 @@ bool IpV6Address::operator!=(const IpV6Address& address) const {
 
 //==============================================================================
 
-NetworkAddress::NetworkAddress() : family(NetworkAddressFamily::unknown) {}
+NetworkAddress::NetworkAddress() : family(NetworkAddressFamily::unknown), ipV4() {}
 
 //==============================================================================
 

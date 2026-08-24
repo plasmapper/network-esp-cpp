@@ -298,8 +298,10 @@ void TcpServer::TaskCode(void* parameters) {
         }
         server.enableFromRequest = false;
       }
-      else
+      else {
         server.disable = true;
+        server.disabledEvent.Generate();
+      }
 
       server.Unlock();
     }

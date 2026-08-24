@@ -42,15 +42,13 @@ esp_err_t EspNetworkInterface::DisableIpV4DhcpClient() {
 //==============================================================================
 
 esp_err_t EspNetworkInterface::EnableIpV6DhcpClient() {
-  ESP_RETURN_ON_ERROR(ESP_ERR_NOT_SUPPORTED, TAG, "IPv6 DHCP client is not supported");
-  return ESP_OK;
+  return ESP_ERR_NOT_SUPPORTED;
 }
 
 //==============================================================================
 
 esp_err_t EspNetworkInterface::DisableIpV6DhcpClient() {
-  ESP_RETURN_ON_ERROR(ESP_ERR_NOT_SUPPORTED, TAG, "IPv6 DHCP client is not supported");
-  return ESP_OK;
+  return ESP_ERR_NOT_SUPPORTED;
 }
 
 //==============================================================================
@@ -155,8 +153,7 @@ IpV6Address EspNetworkInterface::GetIpV6GlobalAddress() {
 //==============================================================================
 
 esp_err_t EspNetworkInterface::SetIpV6GlobalAddress(IpV6Address address) {
-  ESP_RETURN_ON_ERROR(ESP_ERR_NOT_SUPPORTED, TAG, "set IPv6 global address is not supported");
-  return ESP_OK;
+  return ESP_ERR_NOT_SUPPORTED;
 }
 
 //==============================================================================

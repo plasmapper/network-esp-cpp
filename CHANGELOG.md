@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.4.0] - 2026-08-24
 ### Added
 - TcpClient connect timeout.
 
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing socket ownership documentation for the NetworkStream constructor.
 - EspEthernet::Initialize and EspWiFiStation::Initialize not checking driver and netif creation results before use.
 - NetworkAddress default constructor leaving the address union uninitialized.
-- EspEthernet::Initialize not checking the PHY, MAC, netif or netif glue creation results before use.
+- EspNetworkInterface logging an error for permanently unsupported IPv6 operations.
 
 ## [1.3.3] - 2026-08-19
 ### Fixed

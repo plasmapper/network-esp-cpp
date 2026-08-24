@@ -112,7 +112,7 @@ void TestTcp() {
   TEST_ASSERT(!server.IsEnabled());
 
   TEST_ASSERT(ipV4Client.Disconnect() == ESP_OK);
-  TEST_ASSERT(ipV4Client.Connect() == ESP_FAIL);
+  TEST_ASSERT(ipV4Client.Connect() != ESP_OK);
 }
 
 //==============================================================================

@@ -10,6 +10,9 @@ namespace PL {
 /// @brief TCP client class
 class TcpClient : public Lockable {
 public:
+  /// @brief Default connect operation timeout in FreeRTOS ticks
+  static constexpr TickType_t defaultConnectTimeout = 5000 / portTICK_PERIOD_MS;
+
   /// @brief Creates an IPv4 TCP client
   /// @param address IPv4 addres
   /// @param port port
@@ -29,6 +32,15 @@ public:
   /// @brief Connects to the server if not already connected
   /// @return error code
   esp_err_t Connect();
+
+  /// @brief Gets the connect operation timeout
+  /// @return timeout in FreeRTOS ticks
+  TickType_t GetConnectTimeout();
+
+  /// @brief Sets the connect operation timeout
+  /// @param timeout timeout in FreeRTOS ticks
+  /// @return error code
+  esp_err_t SetConnectTimeout(TickType_t timeout);
 
   /// @brief Disconnects from the server
   /// @return error code
@@ -92,6 +104,7 @@ private:
   Mutex mutex;
   NetworkEndpoint remoteEndpoint;
   std::shared_ptr<NetworkStream> stream;
+  TickType_t connectTimeout = defaultConnectTimeout;
   TickType_t readTimeout = NetworkStream::defaultReadTimeout;
   TickType_t writeTimeout = NetworkStream::defaultWriteTimeout;
   bool nagleAlgorithmEnabled = true;

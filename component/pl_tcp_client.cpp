@@ -1,6 +1,7 @@
 #include "pl_tcp_client.h"
 #include "lwip/sockets.h"
 #include "esp_check.h"
+#include <fcntl.h>
 
 //==============================================================================
 
@@ -51,13 +52,18 @@ esp_err_t TcpClient::Connect() {
   int sock = socket(addressFamily, SOCK_STREAM, IPPROTO_TCP);
   ESP_RETURN_ON_FALSE(sock >= 0, ESP_FAIL, TAG, "socket create failed (%d)", errno);
 
+  int socketFlags = fcntl(sock, F_GETFL, 0);
+  fcntl(sock, F_SETFL, socketFlags | O_NONBLOCK);
+
   bool connected = false;
+  int connectErrno = 0;
   if (remoteEndpoint.address.family == NetworkAddressFamily::ipV4) {
     sockaddr_in sockAddr = {};
     sockAddr.sin_family = addressFamily;
     sockAddr.sin_addr.s_addr = remoteEndpoint.address.ipV4.u32;
     sockAddr.sin_port = htons(remoteEndpoint.port);
     connected = (connect(sock, (sockaddr*)&sockAddr, sizeof(sockAddr)) == 0);
+    connectErrno = errno;
   }
   else {
     sockaddr_in6 sockAddr = {};
@@ -69,10 +75,46 @@ esp_err_t TcpClient::Connect() {
     sockAddr.sin6_scope_id = remoteEndpoint.address.ipV6.zoneId;
     sockAddr.sin6_port = htons(remoteEndpoint.port);
     connected = (connect(sock, (sockaddr*)&sockAddr, sizeof(sockAddr)) == 0);
+    connectErrno = errno;
   }
 
+  // A non-blocking connect that has not failed immediately is in progress; wait for the socket
+  // to become writable (or for the connect timeout to expire) and read the real outcome from SO_ERROR.
+  if (!connected && connectErrno == EINPROGRESS) {
+    fd_set writeSet;
+    FD_ZERO(&writeSet);
+    FD_SET(sock, &writeSet);
+
+    timeval tv = {};
+    timeval* tvPtr = &tv;
+    if (connectTimeout == portMAX_DELAY)
+      tvPtr = NULL;
+    else {
+      uint32_t timeoutMs = connectTimeout * portTICK_PERIOD_MS;
+      tv.tv_sec = timeoutMs / 1000;
+      tv.tv_usec = (timeoutMs % 1000) * 1000;
+    }
+
+    int selectResult = select(sock + 1, NULL, &writeSet, NULL, tvPtr);
+    if (selectResult > 0) {
+      int socketError = 0;
+      socklen_t socketErrorSize = sizeof(socketError);
+      if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &socketError, &socketErrorSize) != 0)
+        connectErrno = errno;
+      else if (socketError == 0)
+        connected = true;
+      else
+        connectErrno = socketError;
+    }
+    else if (selectResult == 0)
+      connectErrno = ETIMEDOUT;
+    else
+      connectErrno = errno;
+  }
+
+  fcntl(sock, F_SETFL, socketFlags);
+
   if (!connected) {
-    int connectErrno = errno;
     close(sock);
     ESP_RETURN_ON_ERROR(ESP_FAIL, TAG, "socket connect failed (%d)", connectErrno);
   }
@@ -81,6 +123,21 @@ esp_err_t TcpClient::Connect() {
   ESP_RETURN_ON_ERROR((nagleAlgorithmEnabled ? stream->EnableNagleAlgorithm() : stream->DisableNagleAlgorithm()), TAG, "set Nagle's algorithm failed");
   ESP_RETURN_ON_ERROR(stream->SetReadTimeout(readTimeout), TAG, "set read timeout failed");
   ESP_RETURN_ON_ERROR(stream->SetWriteTimeout(writeTimeout), TAG, "set write timeout failed");
+  return ESP_OK;
+}
+
+//==============================================================================
+
+TickType_t TcpClient::GetConnectTimeout() {
+  LockGuard lg(*this);
+  return connectTimeout;
+}
+
+//==============================================================================
+
+esp_err_t TcpClient::SetConnectTimeout(TickType_t timeout) {
+  LockGuard lg(*this);
+  connectTimeout = timeout;
   return ESP_OK;
 }
 

@@ -32,12 +32,13 @@ EspEthernet::EspEthernet(PhyNewFunction phyNewFunction, int32_t phyAddress, int 
 EspEthernet::~EspEthernet() {
   if (netif) {
     esp_event_handler_instance_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);
+    esp_eth_stop(handle);
     esp_eth_del_netif_glue(netifGlueHandle);
     esp_netif_destroy(netif);
-    esp_eth_stop(handle);
-    esp_eth_driver_uninstall(handle);
-    mac->del(mac);
-    phy->del(phy);
+    if (esp_eth_driver_uninstall(handle) == ESP_OK) {
+      mac->del(mac);
+      phy->del(phy);
+    }
   }
 }
 

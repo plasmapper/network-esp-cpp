@@ -26,8 +26,8 @@ EspWiFiStation::~EspWiFiStation() {
   if (netif) {
     esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);
     esp_wifi_stop();
-    esp_wifi_deinit();
-    esp_netif_destroy_default_wifi(netif);
+    if (esp_wifi_deinit() == ESP_OK)
+      esp_netif_destroy_default_wifi(netif);
   }
 }
 

@@ -22,6 +22,8 @@ public:
 
   /// @brief Creates an open network stream
   /// @param sock stream socket
+  /// @note The stream does not take ownership of the socket. The caller remains responsible for
+  /// closing it, whether by calling Close or by closing the socket directly.
   NetworkStream(int sock);
 
   esp_err_t Lock(TickType_t timeout = portMAX_DELAY) override;

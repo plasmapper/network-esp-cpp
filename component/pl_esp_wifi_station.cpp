@@ -59,7 +59,8 @@ esp_err_t EspWiFiStation::Initialize() {
   config.sta.pmf_cfg.capable = true;
 
   esp_netif_t* newNetif = esp_netif_create_default_wifi_sta();
-  
+  ESP_RETURN_ON_FALSE(newNetif, ESP_ERR_NO_MEM, TAG, "netif create failed");
+
   esp_err_t error = esp_wifi_init(&wifiInitCfg);
   if (error != ESP_OK) {
     esp_netif_destroy_default_wifi(newNetif);

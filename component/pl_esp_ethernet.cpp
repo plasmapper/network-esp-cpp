@@ -66,7 +66,14 @@ esp_err_t EspEthernet::Initialize() {
     return ESP_OK;
 
   esp_eth_phy_t* newPhy = phyNewFunction(&phyConfig);
+  ESP_RETURN_ON_FALSE(newPhy, ESP_ERR_NO_MEM, TAG, "phy new failed");
+
   esp_eth_mac_t* newMac = esp_eth_mac_new_esp32(&esp32EmacConfig, &macConfig);
+  if (!newMac) {
+    newPhy->del(newPhy);
+    ESP_RETURN_ON_ERROR(ESP_ERR_NO_MEM, TAG, "mac new failed");
+  }
+
   esp_eth_config_t ethernetConfig = ETH_DEFAULT_CONFIG(newMac, newPhy);
 
   esp_eth_handle_t newHandle = NULL;
@@ -80,6 +87,16 @@ esp_err_t EspEthernet::Initialize() {
   esp_netif_config_t netifConfig = ESP_NETIF_DEFAULT_ETH();
   esp_netif_t* newNetif = esp_netif_new(&netifConfig);
   esp_eth_netif_glue_handle_t newNetifGlueHandle = esp_eth_new_netif_glue(newHandle);
+  if (!newNetif || !newNetifGlueHandle) {
+    if (newNetifGlueHandle)
+      esp_eth_del_netif_glue(newNetifGlueHandle);
+    if (newNetif)
+      esp_netif_destroy(newNetif);
+    esp_eth_driver_uninstall(newHandle);
+    newMac->del(newMac);
+    newPhy->del(newPhy);
+    ESP_RETURN_ON_ERROR(ESP_ERR_NO_MEM, TAG, "netif or netif glue create failed");
+  }
 
   if ((error = esp_netif_attach(newNetif, newNetifGlueHandle)) != ESP_OK) {
     esp_eth_del_netif_glue(newNetifGlueHandle);

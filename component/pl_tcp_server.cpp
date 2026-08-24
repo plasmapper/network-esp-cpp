@@ -265,6 +265,10 @@ void TcpServer::TaskCode(void* parameters) {
               server.SetStreamSocketOptions();
               server.clientConnectedEvent.Generate(*clientStream);
             }
+            else {
+              ESP_LOGE(TAG, "socket accept failed (%d)", errno);
+              noPendingConnections = true;
+            }
           }
           else
             noPendingConnections = true;

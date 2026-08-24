@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - TcpServer task not being stopped before the derived object is destroyed.
+- TcpServer accept loop spinning forever on a failed accept.
 
 ## [1.3.3] - 2026-08-19
 ### Fixed

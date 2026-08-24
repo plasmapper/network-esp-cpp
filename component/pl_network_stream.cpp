@@ -45,6 +45,7 @@ esp_err_t NetworkStream::Read(void* dest, size_t size) {
   TickType_t remainingTimeout = readTimeout;
 
   int res = 0;
+  bool timedOut = false;
   do {
     if (dest) {
       res = recv(sock, (uint8_t*)dest, size, 0);
@@ -60,13 +61,16 @@ esp_err_t NetworkStream::Read(void* dest, size_t size) {
       if (res > 0)
         size -= res;
     }
-  } while (size && (res > 0 || (res < 0 && errno == EAGAIN)) && xTaskCheckForTimeOut(&xTimeOut, &remainingTimeout) == pdFALSE);
+
+    // res = 0 means the peer closed the connection
+    if (size && (res > 0 || (res < 0 && errno == EAGAIN)))
+      timedOut = xTaskCheckForTimeOut(&xTimeOut, &remainingTimeout) != pdFALSE;
+  } while (size && (res > 0 || (res < 0 && errno == EAGAIN)) && !timedOut);
 
   if (!size)
     return ESP_OK;
 
-  // res = 0 means the peer closed the connection
-  ESP_RETURN_ON_FALSE(res == 0 || errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");
+  ESP_RETURN_ON_FALSE(!timedOut, ESP_ERR_TIMEOUT, TAG, "timeout");
 
   Close();
   ESP_RETURN_ON_ERROR(ESP_FAIL, TAG, "read failed");
@@ -87,18 +91,22 @@ esp_err_t NetworkStream::Write(const void* src, size_t size) {
   TickType_t remainingTimeout = writeTimeout;
 
   int res;
+  bool timedOut = false;
   do {
     res = send(sock, src, size, 0);
     if (res > 0) {
       size -= res;
       src = (const uint8_t*)src + res;
     }
-  } while (size && (res > 0 || (res < 0 && errno == EAGAIN)) && xTaskCheckForTimeOut(&xTimeOut, &remainingTimeout) == pdFALSE);
+
+    if (size && (res > 0 || (res < 0 && errno == EAGAIN)))
+      timedOut = xTaskCheckForTimeOut(&xTimeOut, &remainingTimeout) != pdFALSE;
+  } while (size && (res > 0 || (res < 0 && errno == EAGAIN)) && !timedOut);
 
   if (!size)
     return ESP_OK;
 
-  ESP_RETURN_ON_FALSE(errno != EAGAIN, ESP_ERR_TIMEOUT, TAG, "timeout");
+  ESP_RETURN_ON_FALSE(!timedOut, ESP_ERR_TIMEOUT, TAG, "timeout");
 
   Close();
   ESP_RETURN_ON_ERROR(ESP_FAIL, TAG, "write failed");

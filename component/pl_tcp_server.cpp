@@ -21,9 +21,10 @@ TcpServer::TcpServer(uint16_t port) : clientConnectedEvent(*this), clientDisconn
 //==============================================================================
 
 TcpServer::~TcpServer() {
-  if (taskHandle)
+  if (taskHandle) {
     ESP_LOGE(TAG, "StopTask was not called by the derived class destructor");
-  StopTask();
+    abort();
+  }
 }
 
 //==============================================================================
@@ -77,7 +78,6 @@ esp_err_t TcpServer::Disable() {
     return ESP_OK;
 
   ESP_RETURN_ON_ERROR(StopTask(), TAG, "stop task failed");
-  disabledEvent.Generate();
   return ESP_OK;
 }
 
@@ -203,9 +203,12 @@ esp_err_t TcpServer::SetKeepAliveCount(int count) {
 //==============================================================================
 
 esp_err_t TcpServer::StopTask() {
-  ESP_RETURN_ON_FALSE(taskHandle != xTaskGetCurrentTaskHandle(), ESP_ERR_INVALID_STATE, TAG,
-                      "stop task called from the server task itself");
+  if (taskHandle == xTaskGetCurrentTaskHandle()) {
+    ESP_LOGE(TAG, "stop task called from the server task itself");
+    abort();
+  }
   LockGuard lg(*this);
+  bool wasRunning = taskHandle;
   while (taskHandle) {
     disable = true;
     vTaskDelay(1);
@@ -214,6 +217,8 @@ esp_err_t TcpServer::StopTask() {
   for (auto& clientStream : clientStreams)
     clientStream->Close();
   clientStreams.clear();
+  if (wasRunning)
+    disabledEvent.Generate();
   return ESP_OK;
 }
 

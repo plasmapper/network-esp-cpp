@@ -1,7 +1,7 @@
-version: "1.4.0"
+version: "1.4.1"
 license: "MIT"
 description: Network C++ class component for ESP-IDF
 url: https://github.com/plasmapper/network-esp-cpp
 dependencies:
   idf: ">=5.3,<7.0"
-  plasmapper/pl_common: "^2.1.0"
+  plasmapper/pl_common: "^2.1.1"

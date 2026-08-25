@@ -36,8 +36,9 @@ public:
   /// @param port port
   TcpServer(uint16_t port);
 
-  /// @note Every derived class must call StopTask as the first statement of its
-  /// own destructor so that TaskCode does not call HandleRequest on a partially destroyed object.
+  /// @note Every derived class must call StopTask as the first statement of its own destructor
+  /// so that TaskCode does not call HandleRequest on a partially destroyed object; the base
+  /// destructor aborts if this was not done.
   ~TcpServer();
   TcpServer(const TcpServer&) = delete;
   TcpServer& operator=(const TcpServer&) = delete;
@@ -99,7 +100,8 @@ public:
 protected:
   /// @brief Stops the server task, closes the client streams and waits for the task to exit
   /// @note Must be called as the first statement of the destructor of every derived class
-  /// so that TaskCode does not call HandleRequest on a partially destroyed object.
+  /// so that TaskCode does not call HandleRequest on a partially destroyed object. Aborts
+  /// if called from the server task itself, since it cannot wait for its own task to exit.
   /// @return error code
   esp_err_t StopTask();
 

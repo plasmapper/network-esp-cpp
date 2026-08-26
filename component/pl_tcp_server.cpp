@@ -208,17 +208,16 @@ esp_err_t TcpServer::StopTask() {
     abort();
   }
   LockGuard lg(*this);
-  bool wasRunning = taskHandle;
+  if (!taskHandle)
+    return ESP_OK;
   while (taskHandle) {
     disable = true;
     vTaskDelay(1);
   }
-
   for (auto& clientStream : clientStreams)
     clientStream->Close();
   clientStreams.clear();
-  if (wasRunning)
-    disabledEvent.Generate();
+  disabledEvent.Generate();
   return ESP_OK;
 }
 

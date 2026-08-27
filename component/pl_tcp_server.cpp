@@ -136,6 +136,8 @@ uint16_t TcpServer::GetPort() {
 
 esp_err_t TcpServer::SetPort(uint16_t port) {
   LockGuard lg(*this);
+  if (this->port == port)
+    return ESP_OK;
   this->port = port;
   ESP_RETURN_ON_ERROR(RestartIfEnabled(), TAG, "restart failed");
   return ESP_OK;
@@ -152,6 +154,8 @@ size_t TcpServer::GetMaxNumberOfClients() {
 
 esp_err_t TcpServer::SetMaxNumberOfClients(size_t maxNumberOfClients) {
   LockGuard lg(*this);
+  if (this->maxNumberOfClients == maxNumberOfClients)
+    return ESP_OK;
   this->maxNumberOfClients = maxNumberOfClients;
   ESP_RETURN_ON_ERROR(RestartIfEnabled(), TAG, "restart failed");
   return ESP_OK;
@@ -168,6 +172,8 @@ std::vector<std::shared_ptr<NetworkStream>> TcpServer::GetClientStreams() {
 
 esp_err_t TcpServer::SetTaskParameters(const TaskParameters& taskParameters) {
   LockGuard lg(*this);
+  if (this->taskParameters == taskParameters)
+    return ESP_OK;
   this->taskParameters = taskParameters;
   ESP_RETURN_ON_ERROR(RestartIfEnabled(), TAG, "restart failed");
   return ESP_OK;

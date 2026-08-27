@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- EspWiFiStation::SetSsid and SetPassword restarting Wi-Fi even when the value did not change.
+
 ## [1.4.2] - 2026-08-27
 ### Fixed
 - TcpServer::SetPort, SetMaxNumberOfClients and SetTaskParameters restarting the server even when the value did not change.

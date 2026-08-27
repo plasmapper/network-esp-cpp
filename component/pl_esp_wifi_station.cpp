@@ -162,8 +162,9 @@ std::string EspWiFiStation::GetSsid() {
 
 esp_err_t EspWiFiStation::SetSsid(const std::string& ssid) {
   LockGuard lg(*this);
+  if (this->ssid == ssid)
+    return ESP_OK;
   this->ssid = ssid;
-
   if (enabled) {
     ESP_RETURN_ON_ERROR(Disable(), TAG, "disable failed");
     ESP_RETURN_ON_ERROR(Enable(), TAG, "enable failed");
@@ -182,8 +183,9 @@ std::string EspWiFiStation::GetPassword() {
 
 esp_err_t EspWiFiStation::SetPassword(const std::string& password) {
   LockGuard lg(*this);
+  if (this->password == password)
+    return ESP_OK;
   this->password = password;
-
   if (enabled) {
     ESP_RETURN_ON_ERROR(Disable(), TAG, "disable failed");
     ESP_RETURN_ON_ERROR(Enable(), TAG, "enable failed");

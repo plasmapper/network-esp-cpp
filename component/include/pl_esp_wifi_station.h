@@ -13,7 +13,7 @@ namespace PL {
 class EspWiFiStation : public EspNetworkInterface, public WiFiStation {
 public:
   /// @brief Default hardware interface name
-  static const std::string defaultName;
+  static constexpr const char* defaultName = "Wi-Fi";
 
   /// @brief Creates an ESP Wi-Fi station
   EspWiFiStation();

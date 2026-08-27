@@ -12,10 +12,6 @@ namespace PL {
 
 //==============================================================================
 
-const std::string EspWiFiStation::defaultName = "Wi-Fi";
-
-//==============================================================================
-
 EspWiFiStation::EspWiFiStation() {
   SetName(defaultName);
 }

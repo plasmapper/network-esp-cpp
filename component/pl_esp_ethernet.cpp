@@ -14,10 +14,6 @@ namespace PL {
 
 //==============================================================================
 
-const std::string EspEthernet::defaultName = "Ethernet";
-
-//==============================================================================
-
 EspEthernet::EspEthernet(PhyNewFunction phyNewFunction, int32_t phyAddress, int resetPin, int mdcPin, int mdioPin) : phyNewFunction(phyNewFunction) {
   phyConfig.phy_addr = phyAddress;
   phyConfig.reset_gpio_num = resetPin;

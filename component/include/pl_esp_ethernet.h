@@ -19,7 +19,7 @@ public:
   typedef esp_eth_phy_t* (*PhyNewFunction)(const eth_phy_config_t*);
   
   /// @brief Default hardware interface name
-  static const std::string defaultName;
+  static constexpr const char* defaultName = "Ethernet";
 
   /// @brief Creates an ESP Ethernet interface
   /// @param phyNewFunction PHY generator function

@@ -80,7 +80,9 @@ esp_err_t EspNetworkInterface::SetIpV4Address(IpV4Address address) {
   LockGuard lg(*this);
   ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   esp_netif_ip_info_t ipInfo;
-  ESP_RETURN_ON_ERROR(esp_netif_get_ip_info(netif, &ipInfo), TAG, "get IP info failed");  
+  ESP_RETURN_ON_ERROR(esp_netif_get_ip_info(netif, &ipInfo), TAG, "get IP info failed");
+  if (ipInfo.ip.addr == address.u32)
+    return ESP_OK;
   ipInfo.ip.addr = address.u32;
   ESP_RETURN_ON_ERROR(esp_netif_set_ip_info(netif, &ipInfo), TAG, "set IP info failed");
   return ESP_OK;
@@ -102,7 +104,9 @@ esp_err_t EspNetworkInterface::SetIpV4Netmask(IpV4Address netmask) {
   LockGuard lg(*this);
   ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   esp_netif_ip_info_t ipInfo;
-  ESP_RETURN_ON_ERROR(esp_netif_get_ip_info(netif, &ipInfo), TAG, "get IP info failed");  
+  ESP_RETURN_ON_ERROR(esp_netif_get_ip_info(netif, &ipInfo), TAG, "get IP info failed");
+  if (ipInfo.netmask.addr == netmask.u32)
+    return ESP_OK;
   ipInfo.netmask.addr = netmask.u32;
   ESP_RETURN_ON_ERROR(esp_netif_set_ip_info(netif, &ipInfo), TAG, "set IP info failed");
   return ESP_OK;
@@ -124,7 +128,9 @@ esp_err_t EspNetworkInterface::SetIpV4Gateway(IpV4Address gateway) {
   LockGuard lg(*this);
   ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_STATE, TAG, "network interface is not initialized");
   esp_netif_ip_info_t ipInfo;
-  ESP_RETURN_ON_ERROR(esp_netif_get_ip_info(netif, &ipInfo), TAG, "get IP info failed");  
+  ESP_RETURN_ON_ERROR(esp_netif_get_ip_info(netif, &ipInfo), TAG, "get IP info failed");
+  if (ipInfo.gw.addr == gateway.u32)
+    return ESP_OK;
   ipInfo.gw.addr = gateway.u32;
   ESP_RETURN_ON_ERROR(esp_netif_set_ip_info(netif, &ipInfo), TAG, "set IP info failed");
   return ESP_OK;

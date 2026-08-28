@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NetworkStream::SockAddrToEndpoint IPv4-mapped-IPv6 detection depending on host endianness and reading the port through the wrong sockaddr type.
 - EspNetworkInterface unregistering the IP event handler in the base destructor, after the derived class's own members were already destroyed.
 - EspEthernet::EventHandler not filtering ETH_EVENT by the originating esp_eth_handle_t.
+- EspNetworkInterface::InitializeNetif not guarding against being called twice.
 
 ## [1.4.3] - 2026-08-27
 ### Fixed

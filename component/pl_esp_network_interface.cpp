@@ -13,7 +13,7 @@ namespace PL {
 //==============================================================================
 
 EspNetworkInterface::~EspNetworkInterface() {
-  if (eventHandlerInstance) {
+  if (netif) {
     ESP_LOGE(TAG, "UnregisterEventHandler was not called by the derived class destructor");
     abort();
   }
@@ -168,6 +168,9 @@ esp_err_t EspNetworkInterface::SetIpV6GlobalAddress(IpV6Address address) {
 
 esp_err_t EspNetworkInterface::InitializeNetif(esp_netif_t* netif) {
   LockGuard lg(*this);
+  if (this->netif)
+    return ESP_OK;
+  ESP_RETURN_ON_FALSE(netif, ESP_ERR_INVALID_ARG, TAG, "netif is null");
   ESP_RETURN_ON_ERROR(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, EventHandler, this, &eventHandlerInstance), TAG, "event handler instance register failed");
   this->netif = netif;
   return ESP_OK;
@@ -180,6 +183,7 @@ esp_err_t EspNetworkInterface::UnregisterEventHandler() {
     return ESP_OK;
   ESP_RETURN_ON_ERROR(esp_event_handler_instance_unregister(IP_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance), TAG, "event handler instance unregister failed");
   eventHandlerInstance = NULL;
+  netif = NULL;
   return ESP_OK;
 }
 

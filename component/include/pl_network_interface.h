@@ -21,7 +21,7 @@ public:
   Event<NetworkInterface> lostIpV4AddressEvent;
   /// @brief Network interface got IPv6 event
   Event<NetworkInterface> gotIpV6AddressEvent;
-  /// @brief Network interface lost IPv4 event
+  /// @brief Network interface lost IPv6 event
   Event<NetworkInterface> lostIpV6AddressEvent;
 
   /// @brief Creates a network interface

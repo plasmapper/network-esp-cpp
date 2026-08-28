@@ -208,10 +208,8 @@ void EspNetworkInterface::EventHandler(void* arg, esp_event_base_t eventBase, in
         espNetworkInterface.gotIpV6AddressEvent.Generate();
     }
     if (eventID == IP_EVENT_STA_LOST_IP || eventID == IP_EVENT_ETH_LOST_IP) {
-      if ((*(ip_event_got_ip_t*)eventData).esp_netif == netif) {
+      if ((*(ip_event_got_ip_t*)eventData).esp_netif == netif)
         espNetworkInterface.lostIpV4AddressEvent.Generate();
-        espNetworkInterface.lostIpV6AddressEvent.Generate();
-      }
     }
   }
 }

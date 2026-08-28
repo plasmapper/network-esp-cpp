@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.4.4] - 2026-08-28
 ### Fixed
 - EspWiFiStation::defaultName and EspEthernet::defaultName static initialization order dependency.
 - NetworkStream::SetReadTimeout and SetWriteTimeout with a zero timeout blocking forever instead of not blocking.
@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EspNetworkInterface unregistering the IP event handler in the base destructor, after the derived class's own members were already destroyed.
 - EspEthernet::EventHandler not filtering ETH_EVENT by the originating esp_eth_handle_t.
 - EspNetworkInterface::InitializeNetif not guarding against being called twice.
+- EspNetworkInterface::EventHandler generating lostIpV6AddressEvent on an IPv4-only address loss.
 
 ## [1.4.3] - 2026-08-27
 ### Fixed

@@ -180,7 +180,7 @@ bool EspEthernet::IsConnected() {
 void EspEthernet::EventHandler(void* arg, esp_event_base_t eventBase, int32_t eventID, void* eventData) {
   EspEthernet& ethernet = *(EspEthernet*)arg;
 
-  if (eventBase == ETH_EVENT) {
+  if (eventBase == ETH_EVENT && *(esp_eth_handle_t*)eventData == ethernet.handle) {
     if (eventID == ETHERNET_EVENT_CONNECTED) {
       {
         LockGuard lg(ethernet);

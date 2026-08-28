@@ -11,6 +11,10 @@ namespace PL {
 /// @brief Internal ESP network interface class
 class EspNetworkInterface : public virtual NetworkInterface {
 public:
+  /// @note Every derived class must call UnregisterEventHandler as the first statement of its own
+  /// destructor, before any of its own members are destroyed, so that the IP_EVENT handler cannot
+  /// be invoked on an object whose virtual Lock() no longer dispatches to the derived override.
+  /// The base destructor aborts if this was not done.
   ~EspNetworkInterface();
   EspNetworkInterface(const EspNetworkInterface&) = delete;
   EspNetworkInterface& operator=(const EspNetworkInterface&) = delete;
@@ -42,6 +46,12 @@ protected:
   /// @param netif ESP netif
   /// @return error code
   esp_err_t InitializeNetif(esp_netif_t* netif);
+
+  /// @brief Unregisters the IP event handler
+  /// @note Must be called as the first statement of the destructor of every derived class so
+  /// that no event can be dispatched to this object after its own members start being destroyed.
+  /// @return error code
+  esp_err_t UnregisterEventHandler();
 
 private:
   esp_netif_t* netif = NULL;

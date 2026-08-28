@@ -19,6 +19,7 @@ EspWiFiStation::EspWiFiStation() {
 //==============================================================================
 
 EspWiFiStation::~EspWiFiStation() {
+  UnregisterEventHandler();
   if (netif) {
     Disable();
     esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);

@@ -26,6 +26,7 @@ EspEthernet::EspEthernet(PhyNewFunction phyNewFunction, int32_t phyAddress, int 
 //==============================================================================
 
 EspEthernet::~EspEthernet() {
+  UnregisterEventHandler();
   if (netif) {
     Disable();
     esp_event_handler_instance_unregister(ETH_EVENT, ESP_EVENT_ANY_ID, eventHandlerInstance);

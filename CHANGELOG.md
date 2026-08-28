@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EspWiFiStation::defaultName and EspEthernet::defaultName static initialization order dependency.
 - NetworkStream::SetReadTimeout and SetWriteTimeout with a zero timeout blocking forever instead of not blocking.
 - NetworkStream::SockAddrToEndpoint IPv4-mapped-IPv6 detection depending on host endianness and reading the port through the wrong sockaddr type.
+- EspNetworkInterface unregistering the IP event handler in the base destructor, after the derived class's own members were already destroyed.
 
 ## [1.4.3] - 2026-08-27
 ### Fixed

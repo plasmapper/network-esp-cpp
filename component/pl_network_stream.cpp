@@ -197,8 +197,12 @@ esp_err_t NetworkStream::SetReadTimeout(TickType_t timeout) {
   if (sock < 0)
     return ESP_OK;
 
+  // lwIP treats a zero timeval as "no timeout" (block forever)
+  // 1 ms is the smallest value that survives lwIP's tv_sec*1000 + tv_usec/1000 conversion
   timeval tv = {};
-  if (timeout != portMAX_DELAY) {
+  if (timeout == 0)
+    tv.tv_usec = 1000;
+  else if (timeout != portMAX_DELAY) {
     uint32_t timeoutMs = timeout * portTICK_PERIOD_MS;
     tv.tv_sec = timeoutMs / 1000;
     tv.tv_usec = (timeoutMs % 1000) * 1000;
@@ -222,8 +226,12 @@ esp_err_t NetworkStream::SetWriteTimeout(TickType_t timeout) {
   if (sock < 0)
     return ESP_OK;
 
+  // lwIP treats a zero timeval as "no timeout" (block forever)
+  // 1 ms is the smallest value that survives lwIP's tv_sec*1000 + tv_usec/1000 conversion
   timeval tv = {};
-  if (timeout != portMAX_DELAY) {
+  if (timeout == 0)
+    tv.tv_usec = 1000;
+  else if (timeout != portMAX_DELAY) {
     uint32_t timeoutMs = timeout * portTICK_PERIOD_MS;
     tv.tv_sec = timeoutMs / 1000;
     tv.tv_usec = (timeoutMs % 1000) * 1000;

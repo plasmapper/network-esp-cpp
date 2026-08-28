@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - EspWiFiStation::defaultName and EspEthernet::defaultName static initialization order dependency.
+- NetworkStream::SetReadTimeout and SetWriteTimeout with a zero timeout blocking forever instead of not blocking.
 
 ## [1.4.3] - 2026-08-27
 ### Fixed
